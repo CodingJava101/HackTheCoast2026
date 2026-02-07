@@ -1,0 +1,7 @@
+### Get all cards for American Express
+GET http://localhost:3001/api/cards?bank=American%20Express
+Accept: application/json
+
+### Get all cards for TD
+GET http://localhost:3001/api/cards?bank=TD
+Accept: application/json
