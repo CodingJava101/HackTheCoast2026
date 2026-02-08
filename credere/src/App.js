@@ -21,10 +21,14 @@ function App() {
     const [selectedBank, setSelectedBank] = useState("All Institutions");
 
     // --- SHARED STATE FOR CONTEXT AWARENESS ---
-    // We lift this state up so the Chatbot can "see" what's in the Compare/Quiz tabs
     const [compareLeft, setCompareLeft] = useState(null);
     const [compareRight, setCompareRight] = useState(null);
-    const [quizResults, setQuizResults] = useState([]); // Stores the recommended cards
+    const [quizResults, setQuizResults] = useState([]);
+
+    // --- OPTIMIZER STATE ---
+    const [optimizerResult, setOptimizerResult] = useState(null);
+    const [myWalletIds, setMyWalletIds] = useState([]); // Array of Card IDs
+    const [useEntireDb, setUseEntireDb] = useState(false);
 
     const canadianBanks = useMemo(() => {
         const banks = [...new Set(CREDIT_CARDS.map((card) => card.issuer))].sort();
@@ -94,32 +98,45 @@ function App() {
 
             <nav className="nav-tabs">
                 <button className={activeTab === "home" ? "active" : ""} onClick={() => setActiveTab("home")}>Home</button>
-                <button className={activeTab === "calculator" ? "active" : ""} onClick={() => setActiveTab("calculator")}>CPP Calculator</button>
+                <button className={activeTab === "optimizer" ? "active" : ""} onClick={() => setActiveTab("optimizer")}>Optimizer</button>
+                <button className={activeTab === "calculator" ? "active" : ""} onClick={() => setActiveTab("calculator")}>CPP Calc</button>
                 <button className={activeTab === "quiz" ? "active" : ""} onClick={() => setActiveTab("quiz")}>Find My Card</button>
-                <button className={activeTab === "compare" ? "active" : ""} onClick={() => setActiveTab("compare")}>Compare Cards</button>
+                <button className={activeTab === "compare" ? "active" : ""} onClick={() => setActiveTab("compare")}>Compare</button>
                 <button className={activeTab === "learn" ? "active" : ""} onClick={() => setActiveTab("learn")}>Learn</button>
             </nav>
 
             <main className="content">
                 {activeTab === "home" && <HomePage setActiveTab={setActiveTab} selectedBank={selectedBank} />}
+
+                {activeTab === "optimizer" && (
+                    <OptimizerPage
+                        allCards={CREDIT_CARDS}
+                        myWalletIds={myWalletIds}
+                        setMyWalletIds={setMyWalletIds}
+                        useEntireDb={useEntireDb}
+                        setUseEntireDb={setUseEntireDb}
+                        optimizerResult={optimizerResult}
+                        setOptimizerResult={setOptimizerResult}
+                    />
+                )}
+
                 {activeTab === "calculator" && <CPPCalculator />}
 
-                {/* Pass Setters to Pages so they can update the App state */}
                 {activeTab === "quiz" && (
                     <QuizPage
                         availableCards={availableCards}
                         selectedBank={selectedBank}
-                        setQuizResults={setQuizResults} // <--- Passed down
+                        setQuizResults={setQuizResults}
                     />
                 )}
                 {activeTab === "compare" && (
                     <ComparePage
                         availableCards={availableCards}
                         selectedBank={selectedBank}
-                        leftCard={compareLeft}          // <--- Passed down
-                        setLeftCard={setCompareLeft}    // <--- Passed down
-                        rightCard={compareRight}        // <--- Passed down
-                        setRightCard={setCompareRight}  // <--- Passed down
+                        leftCard={compareLeft}
+                        setLeftCard={setCompareLeft}
+                        rightCard={compareRight}
+                        setRightCard={setCompareRight}
                     />
                 )}
                 {activeTab === "learn" && <LearnPage />}
@@ -130,9 +147,10 @@ function App() {
                 availableCards={availableCards}
                 selectedBank={selectedBank}
                 activeTab={activeTab}
-                compareLeft={compareLeft}   // <--- AI sees left card
-                compareRight={compareRight} // <--- AI sees right card
-                quizResults={quizResults}   // <--- AI sees quiz results
+                compareLeft={compareLeft}
+                compareRight={compareRight}
+                quizResults={quizResults}
+                optimizerResult={optimizerResult}
             />
 
             <footer className="footer">
@@ -146,7 +164,7 @@ function App() {
 
 /* ================= CHATBOT COMPONENT (CONTEXT AWARE) ================= */
 
-function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compareRight, quizResults }) {
+function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compareRight, quizResults, optimizerResult }) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { role: "assistant", text: "Greetings. I am the Credere Oracle. I see exactly what is on your screen. How can I help?" }
@@ -168,7 +186,7 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
 
     /* --- DYNAMIC SYSTEM PROMPT (THE BRAIN) --- */
     const getSystemPrompt = () => {
-        // 1. Base Database (All Available Cards)
+        // 1. Base Database
         const fullDb = availableCards.map(c =>
             `[DB: ${c.name} | Fee: $${c.annualFee} | Student: ${c.studentFriendly ? "YES" : "NO"} | Cat: ${c.category} | Earn: ${c.earnRate.substring(0, 40)}...]`
         ).join("\n");
@@ -176,14 +194,26 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
         // 2. Dynamic "On Screen" Context
         let screenContext = "";
 
-        if (activeTab === "compare") {
+        if (activeTab === "optimizer") {
+            if (optimizerResult) {
+                screenContext = `
+                OPTIMIZER RESULT DISPLAYED:
+                User uploaded an image.
+                AI Recommended: ${optimizerResult.recommendedCard}
+                Reason: ${optimizerResult.reasoning}
+                Category Detected: ${optimizerResult.category}
+                
+                INSTRUCTION: If user asks, explain why this category matches that card's multipliers.
+                `;
+            } else {
+                screenContext = "OPTIMIZER: User is configuring their wallet or uploading an image.";
+            }
+        } else if (activeTab === "compare") {
             if (compareLeft || compareRight) {
                 screenContext = `
                 CURRENTLY COMPARING:
                 LEFT: ${compareLeft ? compareLeft.name + ` ($${compareLeft.annualFee})` : "Empty"}
                 RIGHT: ${compareRight ? compareRight.name + ` ($${compareRight.annualFee})` : "Empty"}
-                
-                INSTRUCTION: Compare these specific cards if asked. Highlight differences in fee and earn rate.
                 `;
             } else {
                 screenContext = "CURRENTLY COMPARING: Nothing selected yet.";
@@ -193,8 +223,6 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
                 screenContext = `
                 QUIZ RESULTS DISPLAYED:
                 ${quizResults.map((r, i) => `#${i+1}: ${r.card.name} (${r.reasons.join(", ")})`).join("\n")}
-                
-                INSTRUCTION: Explain why these specific cards were recommended based on the user's quiz inputs.
                 `;
             } else {
                 screenContext = "QUIZ STATUS: User is taking the quiz or hasn't started.";
@@ -216,7 +244,7 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
         ${fullDb}
         
         STRICT RULES:
-        1. PRIORITIZE the "CURRENTLY COMPARING" or "QUIZ RESULTS" data above. That is what the user is looking at.
+        1. PRIORITIZE the "CURRENTLY COMPARING" or "OPTIMIZER RESULT" or "QUIZ RESULTS" data above. That is what the user is looking at.
         2. Keep answers under 60 words.
         3. Be concise and helpful.
         `;
@@ -226,7 +254,6 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
     const localFallback = (query) => {
         const q = query.toLowerCase();
 
-        // 1. Context Specific Answers
         if (activeTab === "compare" && (compareLeft || compareRight)) {
             if (q.includes("better") || q.includes("compare")) {
                 if (compareLeft && compareRight) {
@@ -242,11 +269,14 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
             }
         }
 
-        // 2. General Search
+        if (activeTab === "optimizer" && optimizerResult) {
+            return `I recommended the ${optimizerResult.recommendedCard} because it has the best multiplier for ${optimizerResult.category}.`;
+        }
+
         const matched = availableCards.filter(c => q.includes(c.name.toLowerCase())).slice(0, 3);
         if (matched.length > 0) return `Found: ${matched.map(c => c.name).join(", ")}.`;
 
-        return "I can help you compare cards, explain fees, or analyze your quiz results.";
+        return "I can help you compare cards, optimize your wallet, or analyze quiz results.";
     };
 
     /* ---------- Text to Speech ---------- */
@@ -532,7 +562,359 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
     );
 }
 
-// ================= MODIFIED PAGE COMPONENTS (RECEIVING PROPS) =================
+// ================= OPTIMIZER PAGE (NEW) =================
+
+function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, setUseEntireDb, optimizerResult, setOptimizerResult }) {
+    const [image, setImage] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Toggle card selection in wallet
+    const toggleCard = (id) => {
+        if (myWalletIds.includes(id)) {
+            setMyWalletIds(myWalletIds.filter(cardId => cardId !== id));
+        } else {
+            setMyWalletIds([...myWalletIds, id]);
+        }
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setOptimizerResult(null); // Reset previous result
+        }
+    };
+
+    const runOptimization = async () => {
+        if (!image) {
+            alert("Please upload an image first.");
+            return;
+        }
+
+        // Determine which cards to analyze
+        let cardsToAnalyze = [];
+        if (useEntireDb) {
+            cardsToAnalyze = allCards;
+        } else {
+            if (myWalletIds.length === 0) {
+                alert("Please select cards in your wallet, or check 'Use Entire Database'.");
+                return;
+            }
+            cardsToAnalyze = allCards.filter(c => myWalletIds.includes(c.id));
+        }
+
+        setIsAnalyzing(true);
+
+        try {
+            // Convert file to Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(image);
+            reader.onloadend = async () => {
+                const base64Data = reader.result.split(',')[1];
+
+                const cardContext = cardsToAnalyze.map(c =>
+                    `- ${c.name}: ${c.earnRate} (Fee: $${c.annualFee})`
+                ).join("\n");
+
+                const prompt = `
+                Analyze this image (receipt, product, or food). 
+                1. Identify the Merchant Category Code (MCC) or general category (e.g., Grocery, Dining, Gas, Drugstore).
+                2. Review the following Credit Cards:
+                ${cardContext}
+                
+                3. Determine which card yields the HIGHEST return for this specific purchase.
+                
+                Return JSON format ONLY:
+                {
+                    "category": "String (e.g. Dining)",
+                    "recommendedCard": "String (Name of card)",
+                    "reasoning": "String (Short explanation why, e.g. 'This card earns 4% on groceries')",
+                    "estimatedReturn": "String (e.g. '4 points/$1')"
+                }
+                `;
+
+                if (!GEMINI_API_KEY) {
+                    throw new Error("No Gemini API Key found.");
+                }
+
+                const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+                // Call the API
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.0-flash",
+                    contents: [
+                        {
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inlineData: {
+                                        mimeType: image.type,
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+                // --- FIX: ROBUST RESPONSE PARSING ---
+                let responseText = "";
+
+                // 1. Try standard SDK method
+                if (typeof response.text === 'function') {
+                    responseText = response.text();
+                }
+                // 2. Try raw property access (New SDK)
+                else if (response.candidates && response.candidates[0]?.content?.parts?.[0]?.text) {
+                    responseText = response.candidates[0].content.parts[0].text;
+                }
+                // 3. Fallback for edge cases
+                else if (typeof response.text === 'string') {
+                    responseText = response.text;
+                }
+                else {
+                    console.error("Unknown Response Structure:", response);
+                    throw new Error("Could not extract text from AI response.");
+                }
+
+                // Clean and Parse JSON
+                const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(jsonString);
+
+                setOptimizerResult(data);
+                setIsAnalyzing(false);
+            };
+        } catch (error) {
+            console.error("Optimization failed:", error);
+            alert("AI Analysis failed. See console for details.");
+            setIsAnalyzing(false);
+        }
+    };
+
+    return (
+        <div className="optimizer-page">
+            <div className="greek-column left-column"></div>
+            <div className="greek-column right-column"></div>
+
+            <section className="optimizer-header">
+                <h2>Spending Optimizer</h2>
+                <p>Upload a receipt or snap a photo of a product. Credere Vision will tell you which card to use.</p>
+            </section>
+
+            <div className="optimizer-grid">
+                {/* Left Panel: Wallet Config */}
+                <div className="panel wallet-panel">
+                    <div className="panel-header">
+                        <h3>My Wallet</h3>
+                        <div className="toggle-container">
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={useEntireDb}
+                                    onChange={() => setUseEntireDb(!useEntireDb)}
+                                />
+                                <span className="slider round"></span>
+                            </label>
+                            <span>Use Entire Database (Any)</span>
+                        </div>
+                    </div>
+
+                    {!useEntireDb && (
+                        <div className="card-selector-list">
+                            <p className="instruction">Select the cards you own:</p>
+                            {allCards.map(card => (
+                                <div
+                                    key={card.id}
+                                    className={`wallet-card-item ${myWalletIds.includes(card.id) ? 'selected' : ''}`}
+                                    onClick={() => toggleCard(card.id)}
+                                >
+                                    <div className="checkbox-indicator">
+                                        {myWalletIds.includes(card.id) && "✓"}
+                                    </div>
+                                    <div className="card-info">
+                                        <div className="card-name">{card.name}</div>
+                                        <div className="card-issuer">{card.issuer}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Visual cue for mobile wallets - optional but good context */}
+
+                </div>
+
+                {/* Right Panel: Vision Analysis */}
+                <div className="panel vision-panel">
+                    <h3>Visual Analysis</h3>
+                    <div className="upload-area">
+                        {!previewUrl ? (
+                            <label className="file-upload-label">
+                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{display:'none'}} />
+                                <span className="upload-icon" style={{fontSize: '3rem'}}>📷</span>
+                                <span>Click to upload Receipt or Item</span>
+                            </label>
+                        ) : (
+                            <div className="image-preview">
+                                <img src={previewUrl} alt="Analysis Target" />
+                                <button className="btn-clear" onClick={() => { setPreviewUrl(null); setImage(null); setOptimizerResult(null); }}>✕ Remove</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        className="btn-primary btn-analyze"
+                        onClick={runOptimization}
+                        disabled={isAnalyzing || !image}
+                        style={{width: '100%', padding: '1rem', marginTop: '1rem'}}
+                    >
+                        {isAnalyzing ? "Consulting the Oracle..." : "Analyze & Optimize"}
+                    </button>
+
+                    {optimizerResult && (
+                        <div className="result-card fade-in">
+                            <div className="result-header">
+                                <span className="label" style={{fontSize: '0.8rem', opacity: 0.8}}>BEST CARD</span>
+                                <h4 style={{fontSize: '1.4rem', margin: '0.5rem 0'}}>{optimizerResult.recommendedCard}</h4>
+                            </div>
+                            <div className="result-body">
+                                <div className="result-row">
+                                    <strong>Category Detected:</strong>
+                                    <span>{optimizerResult.category}</span>
+                                </div>
+                                <div className="result-row">
+                                    <strong>Estimated Return:</strong>
+                                    <span className="highlight">{optimizerResult.estimatedReturn}</span>
+                                </div>
+                                <div className="result-reason">
+                                    <p>"{optimizerResult.reasoning}"</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <style>{`
+                .optimizer-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 2rem;
+                    max-width: 1200px;
+                    margin: 2rem auto;
+                    padding: 0 1rem;
+                }
+                .panel {
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+                    padding: 1.5rem;
+                    border: 1px solid var(--border-gray);
+                }
+                .wallet-card-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.8rem;
+                    border: 1px solid #eee;
+                    margin-bottom: 0.5rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .wallet-card-item:hover { background: #fafafa; }
+                .wallet-card-item.selected {
+                    background: rgba(212, 165, 116, 0.1);
+                    border-color: var(--warm-gold);
+                }
+                .checkbox-indicator {
+                    width: 20px; height: 20px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    margin-right: 1rem;
+                    display: flex; align-items: center; justify-content: center;
+                    color: var(--warm-gold); fontWeight: bold;
+                }
+                .wallet-card-item.selected .checkbox-indicator {
+                    border-color: var(--warm-gold);
+                    background: white;
+                }
+                .card-selector-list {
+                    max-height: 400px;
+                    overflow-y: auto;
+                    margin-top: 1rem;
+                }
+                .upload-area {
+                    border: 2px dashed #ddd;
+                    border-radius: 8px;
+                    height: 250px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 1.5rem 0;
+                    position: relative;
+                    overflow: hidden;
+                    background-color: #f9f9f9;
+                }
+                .file-upload-label {
+                    cursor: pointer;
+                    display: flex; flex-direction: column; align-items: center;
+                    color: var(--slate);
+                    width: 100%; height: 100%;
+                    justify-content: center;
+                }
+                .image-preview img {
+                    max-height: 100%; max-width: 100%;
+                    object-fit: contain;
+                }
+                .image-preview {
+                    width: 100%; height: 100%;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-direction: column;
+                }
+                .btn-clear {
+                    position: absolute; top: 10px; right: 10px;
+                    background: rgba(0,0,0,0.6); color: white;
+                    border: none; padding: 5px 10px; border-radius: 4px;
+                    cursor: pointer;
+                }
+                .result-card {
+                    margin-top: 1.5rem;
+                    border: 1px solid var(--warm-gold);
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+                .result-header {
+                    background: var(--warm-gold);
+                    color: white;
+                    padding: 1rem;
+                    text-align: center;
+                }
+                .result-body { padding: 1.5rem; }
+                .result-row {
+                    display: flex; justify-content: space-between;
+                    margin-bottom: 0.8rem;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 0.5rem;
+                }
+                .highlight { color: var(--deep-gold); font-weight: bold; }
+                .toggle-container {
+                    display: flex; align-items: center; gap: 0.5rem;
+                    margin-top: 0.5rem;
+                }
+                /* Switch CSS */
+                .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+                .switch input { opacity: 0; width: 0; height: 0; }
+                .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+                .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+                input:checked + .slider { background-color: var(--warm-gold); }
+                input:checked + .slider:before { transform: translateX(18px); }
+            `}</style>
+        </div>
+    );
+}
+
+// ================= ORIGINAL PAGES (RESTORED) =================
 
 function HomePage({ setActiveTab, selectedBank }) {
     return (
@@ -543,6 +925,12 @@ function HomePage({ setActiveTab, selectedBank }) {
                 <h2>Clarity for your {selectedBank === "All Institutions" ? "finances" : selectedBank + " cards"}</h2>
                 <p className="hero-subtitle">Unbiased tools and transparent comparisons</p>
                 <section className="action-cards">
+                    {/* NEW OPTIMIZER CARD */}
+                    <div className="action-card" onClick={() => setActiveTab("optimizer")}>
+                        <div className="card-icon">👁️</div>
+                        <h3>Optimizer</h3>
+                        <p>Vision-based recommendations</p>
+                    </div>
                     <div className="action-card" onClick={() => setActiveTab("quiz")}>
                         <div className="card-icon">⊕</div>
                         <h3>Find My Card</h3>
@@ -564,7 +952,6 @@ function HomePage({ setActiveTab, selectedBank }) {
     );
 }
 
-// Updated QuizPage to accept setQuizResults
 function QuizPage({ availableCards, selectedBank, setQuizResults }) {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [answers, setAnswers] = useState({});
@@ -695,7 +1082,6 @@ function QuizPage({ availableCards, selectedBank, setQuizResults }) {
     );
 }
 
-// Updated ComparePage to accept props
 function ComparePage({ availableCards, selectedBank, leftCard, setLeftCard, rightCard, setRightCard }) {
 
     const ComparisonColumn = ({ card, setCard }) => {
