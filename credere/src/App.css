@@ -1515,5 +1515,16 @@
     .greek-column {
       width: 30px;
     }
+  .landing-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
   }
-  
+
+  .landing-page {
+      background-color: #fdfaf3; /* Matching the 3D background color */
+      overflow: hidden;
+  }
+}

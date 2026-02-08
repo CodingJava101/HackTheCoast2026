@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import "./App.css";
 import { CREDIT_CARDS, GLOSSARY_TERMS, QUIZ_QUESTIONS } from "./data.js";
@@ -5,6 +6,9 @@ import { CREDIT_CARDS, GLOSSARY_TERMS, QUIZ_QUESTIONS } from "./data.js";
 // --- AI SDK IMPORTS ---
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useFBX, Stage, PresentationControls, Html } from "@react-three/drei"; // Added Html
+import { Suspense } from "react";
 
 /* ================= CONFIGURATION ================= */
 
@@ -13,7 +17,76 @@ const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 const ELEVENLABS_API_KEY = process.env.REACT_APP_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
+
+/* ================= 3D MODEL COMPONENT ================= */
+
+/* ================= 3D MODEL COMPONENT ================= */
+
+function ColosseumModel() {
+    // Ensure path is correct based on previous step
+    const fbx = useFBX("/colosseum.fbx");
+    const modelRef = useRef();
+
+    // Slow continuous rotation
+    useFrame((state, delta) => {
+        if (modelRef.current) {
+            modelRef.current.rotation.y += delta * 0.05; // Very slow, majestic rotation
+        }
+    });
+
+    return (
+        <primitive
+            ref={modelRef}
+            object={fbx}
+            // 1. INCREASED SCALE (Adjust this number if it's too big/small)
+            scale={0.025}
+            // 2. POSITIONED AT BOTTOM (x, y, z) - Lower Y pushes it down
+            position={[0, -3.5, 0]}
+        />
+    );
+}
+
+const Scene3D = () => {
+    return (
+        <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 0, // Behind everything
+            overflow: "hidden"
+        }}>
+            <Canvas dpr={[1, 2]} camera={{ position: [0, 2, 8], fov: 50 }}>
+                {/* Match background color to page to blend seamlessly */}
+                <color attach="background" args={["#fdfaf3"]} />
+
+                {/* 3. LIGHTING SETUP (No Black Shadows) */}
+                {/* Ambient light hits every surface equally */}
+                <ambientLight intensity={1.5} />
+                {/* Hemisphere light creates a nice sky/ground gradient, preventing dark undersides */}
+                <hemisphereLight skyColor={"#ffffff"} groundColor={"#fdfaf3"} intensity={1} />
+                {/* Directional light for subtle depth, but soft */}
+                <directionalLight position={[5, 10, 5]} intensity={1} />
+
+                <Suspense fallback={null}>
+                    {/* PresentationControls allow user to rotate the background model if they click empty space */}
+                    <PresentationControls
+                        global
+                        zoom={0.8}
+                        rotation={[0.1, 0, 0]}
+                        polar={[-0.1, 0.1]}
+                        azimuth={[-Math.PI / 4, Math.PI / 4]}
+                    >
+                        <ColosseumModel />
+                    </PresentationControls>
+                </Suspense>
+            </Canvas>
+        </div>
+    );
+};
 /* ================= MAIN APP COMPONENT ================= */
+
 
 function App() {
     const [activeTab, setActiveTab] = useState("home");
@@ -47,12 +120,41 @@ function App() {
             setShowLanding(false);
         }
     };
-
     const LandingPage = () => (
-        <div className="landing-page">
-            <div className="landing-container">
-                <h1 className="landing-title">CREDERE</h1>
-                <div className="landing-form">
+        <div className="landing-page" style={{ position: 'relative', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+
+            {/* 1. The 3D Scene (Background) */}
+            <Scene3D />
+
+            {/* 2. The Content (Foreground) */}
+            <div className="landing-container" style={{
+                position: 'relative',
+                zIndex: 10, // Sits on top of 3D model
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center', // Centers text vertically
+                pointerEvents: 'none' // Allows clicking through to rotate the model
+            }}>
+                <h1 className="landing-title" style={{
+                    marginTop: '0',
+                    textShadow: '0 2px 10px rgba(255, 255, 255, 0.8)' // Adds readability over the model
+                }}>
+                    CREDERE
+                </h1>
+                <p style={{
+                    color: 'var(--warm-gold)',
+                    letterSpacing: '2px',
+                    marginBottom: '2rem',
+                    fontWeight: 'bold',
+                    textShadow: '0 1px 4px rgba(255, 255, 255, 0.8)'
+                }}>
+                    ENTER THE TEMPLE OF FINANCE
+                </p>
+
+                {/* Re-enable clicks for the form area */}
+                <div className="landing-form" style={{ pointerEvents: 'auto' }}>
                     <select
                         className="bank-dropdown"
                         value={selectedBank}
@@ -71,7 +173,6 @@ function App() {
             </div>
         </div>
     );
-
     if (showLanding) {
         return <div className="app"><LandingPage /></div>;
     }
