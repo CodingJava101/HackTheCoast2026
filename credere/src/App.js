@@ -109,7 +109,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>No affiliate links • No hidden agendas • Built for transparency</p>
+      <p>No affiliate links • No hidden agendas • Built for transparency</p>
       </footer>
     </div>
   );
