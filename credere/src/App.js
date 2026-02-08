@@ -14,7 +14,6 @@ function App() {
     }, []);
 
     // Filtered dataset based on landing page selection
-    // This is the source of truth for the rest of the app
     const availableCards = useMemo(() => {
         if (!selectedBank || selectedBank === "All Institutions") {
             return CREDIT_CARDS;
@@ -105,7 +104,6 @@ function App() {
             <main className="content">
                 {activeTab === "home" && <HomePage setActiveTab={setActiveTab} selectedBank={selectedBank} />}
                 {activeTab === "calculator" && <CPPCalculator />}
-                {/* We pass specific availableCards so the quiz/compare only sees the selected institution */}
                 {activeTab === "quiz" && <QuizPage availableCards={availableCards} selectedBank={selectedBank} />}
                 {activeTab === "compare" && <ComparePage availableCards={availableCards} selectedBank={selectedBank} />}
                 {activeTab === "learn" && <LearnPage />}
@@ -154,6 +152,7 @@ function QuizPage({ availableCards, selectedBank }) {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [answers, setAnswers] = useState({});
     const [showResults, setShowResults] = useState(false);
+    const [userArchetype, setUserArchetype] = useState(null);
 
     const handleAnswer = (value) => {
         const question = QUIZ_QUESTIONS[currentQuestion];
@@ -165,125 +164,119 @@ function QuizPage({ availableCards, selectedBank }) {
         }
     };
 
-    // IMPROVED RECOMMENDATION LOGIC
+    // Determine the user's "Persona" or Archetype
+    const determineArchetype = (answers) => {
+        const { 1: spending, 4: travel, 5: income } = answers;
+
+        if (income === 'student') return "The Aspiring Student";
+        if (travel === 'frequent' || travel === 'multiple') return "The Jetsetter";
+        if (spending === 'very-high' && income === 'high') return "The High Roller";
+        if (spending === 'low') return "The Value Seeker";
+        return "The Balanced Spender";
+    };
+
     const getRecommendations = () => {
         const {
-            1: spendingAmount, // low, medium, high, very-high
-            2: topCategory,    // groceries, gas, travel, online, mixed
-            3: carriesBalance, // never, sometimes, usually
-            4: travelFreq,     // never, once, multiple, frequent
-            5: incomeLevel     // student, entry, mid, high
+            1: spendingAmount,
+            2: topCategory,
+            3: carriesBalance,
+            4: travelFreq,
+            5: incomeLevel
         } = answers;
 
-        // Map income level to rough numeric value for eligibility checks
-        const incomeMap = {
-            'student': 15000,
-            'entry': 35000,
-            'mid': 65000,
-            'high': 120000
-        };
+        // Map income
+        const incomeMap = { 'student': 15000, 'entry': 35000, 'mid': 65000, 'high': 120000 };
         const userIncome = incomeMap[incomeLevel] || 0;
+
+        // Determine Archetype for weighting
+        const archetype = determineArchetype(answers);
 
         return availableCards.map(card => {
             let score = 0;
             let reasons = [];
 
-            // --- 1. HARD FILTER: INCOME ELIGIBILITY ---
-            // If user makes 40k but card needs 80k, exclude it (set score extremely low)
-            if (card.minIncome > userIncome) {
-                return { card, score: -999, reasons: ["Income requirement not met"] };
-            }
+            // 1. HARD FILTER: INCOME
+            if (card.minIncome > userIncome) return { card, score: -999, reasons: [] };
 
-            // --- 2. SPENDING & FEES ---
-            // If user spends very little, high fees are bad math.
-            if (spendingAmount === 'low') {
-                if (card.annualFee === 0) {
-                    score += 15;
-                    reasons.push("No annual fee matches your spending volume");
-                } else {
-                    score -= 10; // Penalize fees for low spenders
-                }
-            } else if (spendingAmount === 'very-high') {
-                if (card.tier === 'S' || card.tier === 'A') {
-                    score += 10; // High spenders benefit from premium tiers
-                }
-            }
-
-            // --- 3. STUDENT LOGIC ---
-            if (incomeLevel === 'student') {
-                if (card.studentFriendly) {
-                    score += 20;
-                    reasons.push("Designed for students");
-                }
-                if (card.annualFee > 0) score -= 5; // Students usually dislike fees
-            }
-
-            // --- 4. CATEGORY MATCHING (SMARTER) ---
             const earnRateLower = card.earnRate.toLowerCase();
 
-            // Check specific keywords in the earn rate even if card category doesn't match perfectly
+            // 2. ARCHETYPE WEIGHTING
+            switch (archetype) {
+                case "The Aspiring Student":
+                    if (card.studentFriendly) { score += 30; reasons.push("Student-specific benefits"); }
+                    if (card.annualFee === 0) { score += 20; reasons.push("No annual fee (essential for students)"); }
+                    else { score -= 20; } // Heavily penalize fees
+                    break;
+
+                case "The Jetsetter":
+                    if (card.category === 'travel') { score += 25; reasons.push("Premium travel rewards"); }
+                    if (card.foreignFee === 0) { score += 20; reasons.push("No FX fees on your travels"); }
+                    if (card.tier === 'S' || card.tier === 'A') { score += 10; }
+                    break;
+
+                case "The High Roller":
+                    if (card.tier === 'S') { score += 25; reasons.push("Luxury perks matching your lifestyle"); }
+                    if (card.annualFee > 150) { score += 5; } // Fee is less relevant, perks matter
+                    break;
+
+                case "The Value Seeker":
+                    if (card.annualFee === 0) { score += 30; reasons.push("Zero annual fee"); }
+                    if (card.category === 'cashback') { score += 15; reasons.push("Simple cash back returns"); }
+                    break;
+
+                default: // Balanced Spender
+                    if (card.annualFee < 150) score += 10;
+                    break;
+            }
+
+            // 3. SPENDING CATEGORY MATCH
             if (topCategory === 'groceries') {
-                if (earnRateLower.includes('grocery') || earnRateLower.includes('food') || earnRateLower.includes('dining')) {
-                    score += 15;
-                    reasons.push("High rewards on food & groceries");
-                }
+                if (earnRateLower.includes('grocery') || earnRateLower.includes('food')) { score += 15; reasons.push("High grocery earn rate"); }
             } else if (topCategory === 'gas') {
-                if (earnRateLower.includes('gas') || earnRateLower.includes('transport')) {
-                    score += 15;
-                    reasons.push("Excellent returns on fuel");
-                }
+                if (earnRateLower.includes('gas') || earnRateLower.includes('transport')) { score += 15; reasons.push("Great for gas & transit"); }
             } else if (topCategory === 'travel') {
-                if (card.category === 'travel' || earnRateLower.includes('travel') || earnRateLower.includes('flight')) {
-                    score += 15;
-                    reasons.push("Maximizes travel purchases");
-                }
-            }
-
-            // --- 5. TRAVEL FREQUENCY ---
-            if (travelFreq === 'never') {
-                if (card.category === 'travel') {
-                    score -= 10; // Don't recommend travel cards to homebodies
-                } else if (card.category === 'cashback') {
-                    score += 10; // Push cashback instead
-                    reasons.push("Cash back is better than miles for you");
-                }
-            } else if (travelFreq === 'multiple' || travelFreq === 'frequent') {
-                if (card.foreignFee === 0) {
-                    score += 15;
-                    reasons.push("Saves 2.5% on every foreign transaction");
-                }
-                if (card.category === 'travel') {
-                    score += 10;
-                }
-            }
-
-            // --- 6. FINANCIAL HABITS ---
-            if (carriesBalance === 'usually') {
-                // If carrying a balance, high fee cards are dangerous
-                if (card.annualFee > 100) score -= 20;
-                if (card.category === 'cashback') {
-                    score += 5; // simpler value
-                }
+                if (earnRateLower.includes('travel') || earnRateLower.includes('flight')) { score += 15; reasons.push("Accelerated travel earning"); }
             }
 
             return { card, score, reasons };
         })
-            .filter(item => item.score > -100) // Remove ineligible cards
-            .sort((a, b) => b.score - a.score) // Sort by score
-            .slice(0, 3); // Top 3
+            .filter(item => item.score > -100)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
     };
 
     if (showResults) {
         const recommendations = getRecommendations();
+        const archetype = determineArchetype(answers);
         const hasResults = recommendations.length > 0;
 
         return (
             <div className="results-page">
-                <h2>Top Matches {selectedBank !== "All Institutions" ? `for ${selectedBank}` : ""}</h2>
+                <div style={{textAlign: 'center', marginBottom: '2rem'}}>
+                    <span style={{
+                        display: 'inline-block',
+                        padding: '0.5rem 1rem',
+                        background: 'var(--warm-gold)',
+                        color: 'white',
+                        fontWeight: '600',
+                        marginBottom: '0.5rem',
+                        letterSpacing: '0.05em'
+                    }}>
+                        ARCHETYPE DETECTED
+                    </span>
+                    <h2 style={{fontSize: '2.5rem', margin: '0'}}>{archetype}</h2>
+                    <p style={{color: 'var(--slate)'}}>
+                        {archetype === "The Aspiring Student" && "Building credit with minimal costs."}
+                        {archetype === "The Jetsetter" && "Maximizing miles and lounge access."}
+                        {archetype === "The High Roller" && "Luxury perks and premium service."}
+                        {archetype === "The Value Seeker" && "Keeping costs low and returns simple."}
+                        {archetype === "The Balanced Spender" && "A sensible mix of value and rewards."}
+                    </p>
+                </div>
 
                 {!hasResults && (
                     <div className="result">
-                        <p>No matches found based on your income and preferences for this institution.</p>
+                        <p>No matches found matching your strict criteria.</p>
                         <button className="btn-secondary" onClick={() => {setShowResults(false); setCurrentQuestion(0);}}>Try Again</button>
                     </div>
                 )}
@@ -296,16 +289,17 @@ function QuizPage({ availableCards, selectedBank }) {
                             <span className={`tier-badge tier-${rec.card.tier.toLowerCase()}`}>{rec.card.tier}</span>
                         </div>
                         <div className="rec-reasons">
-                            <h4>Why this card?</h4>
+                            <h4>Why this fits your archetype:</h4>
                             <ul>{rec.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
                         </div>
                         <div className="rec-details">
                             <div><strong>Fee:</strong> {rec.card.annualFee === 0 ? "Free" : `$${rec.card.annualFee}`}</div>
-                            <div><strong>Category:</strong> {rec.card.category.charAt(0).toUpperCase() + rec.card.category.slice(1)}</div>
+                            <div><strong>Type:</strong> {rec.card.category.toUpperCase()}</div>
                             <div><strong>Earn Rate:</strong> {rec.card.earnRate}</div>
                         </div>
                     </div>
                 ))}
+
                 {hasResults && (
                     <button className="btn-secondary" onClick={() => {setShowResults(false); setCurrentQuestion(0);}}>Retake Quiz</button>
                 )}
