@@ -11,7 +11,7 @@ import OpenAI from "openai";
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 const ELEVENLABS_API_KEY = process.env.REACT_APP_ELEVENLABS_API_KEY;
-const ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // "Rachel"
+const ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
 /* ================= MAIN APP COMPONENT ================= */
 
@@ -27,7 +27,7 @@ function App() {
 
     // --- OPTIMIZER STATE ---
     const [optimizerResult, setOptimizerResult] = useState(null);
-    const [myWalletIds, setMyWalletIds] = useState([]); // Array of Card IDs
+    const [myWalletIds, setMyWalletIds] = useState([]);
     const [useEntireDb, setUseEntireDb] = useState(false);
 
     const canadianBanks = useMemo(() => {
@@ -98,15 +98,23 @@ function App() {
 
             <nav className="nav-tabs">
                 <button className={activeTab === "home" ? "active" : ""} onClick={() => setActiveTab("home")}>Home</button>
+                <button className={activeTab === "list" ? "active" : ""} onClick={() => setActiveTab("list")}>List</button>
                 <button className={activeTab === "optimizer" ? "active" : ""} onClick={() => setActiveTab("optimizer")}>Optimizer</button>
-                <button className={activeTab === "calculator" ? "active" : ""} onClick={() => setActiveTab("calculator")}>CPP Calc</button>
                 <button className={activeTab === "quiz" ? "active" : ""} onClick={() => setActiveTab("quiz")}>Find My Card</button>
                 <button className={activeTab === "compare" ? "active" : ""} onClick={() => setActiveTab("compare")}>Compare</button>
+                <button className={activeTab === "calculator" ? "active" : ""} onClick={() => setActiveTab("calculator")}>CPP Calc</button>
                 <button className={activeTab === "learn" ? "active" : ""} onClick={() => setActiveTab("learn")}>Learn</button>
             </nav>
 
             <main className="content">
                 {activeTab === "home" && <HomePage setActiveTab={setActiveTab} selectedBank={selectedBank} />}
+
+                {activeTab === "list" && (
+                    <CardListPage
+                        availableCards={availableCards}
+                        setActiveTab={setActiveTab}
+                    />
+                )}
 
                 {activeTab === "optimizer" && (
                     <OptimizerPage
@@ -162,6 +170,295 @@ function App() {
     );
 }
 
+/* ================= NEW COMPONENT: CARD LIST PAGE ================= */
+
+function CardListPage({ availableCards }) {
+    const [filter, setFilter] = useState("all");
+    const [sort, setSort] = useState("name");
+
+    // Helper to estimate First Year Value (FYV)
+    // Formula: (Welcome Bonus * CPP) - Annual Fee
+    const getFYV = (card) => {
+        const bonus = card.welcomeBonus || 0; // Assuming data has welcomeBonus, defaulting if not
+        const cpp = card.typicalCPP || 1;
+        const value = (bonus * cpp / 100) - card.annualFee;
+        return value;
+    };
+
+    const filteredAndSortedCards = useMemo(() => {
+        let result = [...availableCards];
+
+        // 1. Filter
+        if (filter === "student") {
+            result = result.filter(c => c.studentFriendly);
+        } else if (filter === "no-fee") {
+            result = result.filter(c => c.annualFee === 0);
+        } else if (filter === "travel") {
+            result = result.filter(c => c.category === "travel");
+        } else if (filter === "cashback") {
+            result = result.filter(c => c.category === "cashback" || c.earnRate.toLowerCase().includes("cash"));
+        } else if (filter === "premium") {
+            result = result.filter(c => c.annualFee > 120);
+        }
+
+        // 2. Sort
+        result.sort((a, b) => {
+            if (sort === "name") {
+                return a.name.localeCompare(b.name);
+            } else if (sort === "fee-low") {
+                return a.annualFee - b.annualFee;
+            } else if (sort === "fee-high") {
+                return b.annualFee - a.annualFee;
+            } else if (sort === "value") {
+                return getFYV(b) - getFYV(a);
+            }
+            return 0;
+        });
+
+        return result;
+    }, [availableCards, filter, sort]);
+
+    return (
+        <div className="list-page">
+            <div className="greek-column left-column"></div>
+            <div className="greek-column right-column"></div>
+
+            <section className="list-header">
+                <h2>Card Directory</h2>
+                <p>Browse, filter, and analyze the full database.</p>
+            </section>
+
+            {/* Controls */}
+            <div className="list-controls">
+                <div className="control-group">
+                    <label>Filter:</label>
+                    <div className="filter-pills">
+                        <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>All</button>
+                        <button className={filter === "student" ? "active" : ""} onClick={() => setFilter("student")}>Students</button>
+                        <button className={filter === "no-fee" ? "active" : ""} onClick={() => setFilter("no-fee")}>No Annual Fee</button>
+                        <button className={filter === "travel" ? "active" : ""} onClick={() => setFilter("travel")}>Travel</button>
+                        <button className={filter === "cashback" ? "active" : ""} onClick={() => setFilter("cashback")}>Cash Back</button>
+                        <button className={filter === "premium" ? "active" : ""} onClick={() => setFilter("premium")}>Premium</button>
+                    </div>
+                </div>
+
+                <div className="control-group">
+                    <label>Sort By:</label>
+                    <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                        <option value="name">Name (A-Z)</option>
+                        <option value="value">First Year Value (High to Low)</option>
+                        <option value="fee-low">Annual Fee (Low to High)</option>
+                        <option value="fee-high">Annual Fee (High to Low)</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Grid */}
+            <div className="card-list-grid">
+                {filteredAndSortedCards.length === 0 ? (
+                    <div className="no-results">No cards match your filters.</div>
+                ) : (
+                    filteredAndSortedCards.map(card => (
+                        <div key={card.id} className="directory-card">
+                            <div className="dir-card-header">
+                                <span className={`tier-badge tier-${card.tier.toLowerCase()}`}>{card.tier}</span>
+                                <span className="dir-issuer">{card.issuer}</span>
+                            </div>
+                            <h3>{card.name}</h3>
+                            <div className="dir-stats">
+                                <div className="stat">
+                                    <span className="label">Fee</span>
+                                    <span className="value">${card.annualFee}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="label">Income</span>
+                                    <span className="value">{card.minIncome > 0 ? `$${card.minIncome/1000}k` : "None"}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="label">FX Fee</span>
+                                    <span className="value">{card.foreignFee}%</span>
+                                </div>
+                            </div>
+                            <div className="dir-earn">
+                                <strong>Earn:</strong> {card.earnRate}
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <style>{`
+                .list-controls {
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                    margin-bottom: 2rem;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 2rem;
+                    align-items: center;
+                    justify-content: space-between;
+                    border: 1px solid var(--border-gray);
+                }
+                .control-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+                .control-group label {
+                    font-weight: 600;
+                    color: var(--charcoal);
+                }
+                .filter-pills {
+                    display: flex;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                }
+                .filter-pills button {
+                    background: white;
+                    border: 1px solid #ccc;
+                    padding: 0.4rem 0.8rem;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 0.85rem;
+                    transition: all 0.2s;
+                }
+                .filter-pills button.active {
+                    background: var(--warm-gold);
+                    color: white;
+                    border-color: var(--warm-gold);
+                }
+                .control-group select {
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    border: 1px solid #ccc;
+                }
+                .card-list-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 1.5rem;
+                }
+                .directory-card {
+                    background: white;
+                    border: 1px solid var(--border-gray);
+                    border-radius: 8px;
+                    padding: 1.5rem;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .directory-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+                    border-color: var(--warm-gold);
+                }
+                .dir-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                }
+                .dir-issuer {
+                    font-size: 0.8rem;
+                    color: #888;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+                .directory-card h3 {
+                    margin: 0.5rem 0 1rem 0;
+                    font-size: 1.2rem;
+                    min-height: 3rem; /* Align heights */
+                }
+                .dir-stats {
+                    display: flex;
+                    justify-content: space-between;
+                    background: #f9f9f9;
+                    padding: 0.8rem;
+                    border-radius: 4px;
+                    margin-bottom: 1rem;
+                }
+                .stat {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .stat .label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+                .stat .value { font-weight: 600; color: var(--charcoal); }
+                .dir-earn {
+                    font-size: 0.9rem;
+                    line-height: 1.4;
+                    color: #555;
+                }
+                .no-results {
+                    grid-column: 1 / -1;
+                    text-align: center;
+                    padding: 3rem;
+                    font-style: italic;
+                    color: #888;
+                }
+            `}</style>
+        </div>
+    );
+}
+
+/* ================= UPDATED HOME PAGE ================= */
+
+function HomePage({ setActiveTab, selectedBank }) {
+    return (
+        <div className="home-page">
+            <div className="greek-column left-column"></div>
+            <div className="greek-column right-column"></div>
+            <section className="hero">
+                <h2>Clarity for your {selectedBank === "All Institutions" ? "finances" : selectedBank + " cards"}</h2>
+                <p className="hero-subtitle">Unbiased tools and transparent comparisons</p>
+                <section className="action-cards">
+                    {/* NEW: LIST CARD */}
+                    <div className="action-card" onClick={() => setActiveTab("list")}>
+                        <div className="card-icon">☰</div>
+                        <h3>Card Directory</h3>
+                        <p>Sort by Value, Fee, or Student status</p>
+                    </div>
+
+                    {/* EXISTING: OPTIMIZER */}
+                    <div className="action-card" onClick={() => setActiveTab("optimizer")}>
+                        <div className="card-icon">👁️</div>
+                        <h3>Optimizer</h3>
+                        <p>Vision-based recommendations</p>
+                    </div>
+
+                    {/* EXISTING: QUIZ */}
+                    <div className="action-card" onClick={() => setActiveTab("quiz")}>
+                        <div className="card-icon">⊕</div>
+                        <h3>Find My Card</h3>
+                        <p>Personalized matches {selectedBank !== "All Institutions" ? `from ${selectedBank}` : ""}</p>
+                    </div>
+
+                    {/* EXISTING: COMPARE */}
+                    <div className="action-card" onClick={() => setActiveTab("compare")}>
+                        <div className="card-icon">⊞</div>
+                        <h3>Compare</h3>
+                        <p>Side-by-side spec breakdown</p>
+                    </div>
+
+                    {/* EXISTING: CALCULATOR */}
+                    <div className="action-card" onClick={() => setActiveTab("calculator")}>
+                        <div className="card-icon">◈</div>
+                        <h3>CPP Calc</h3>
+                        <p>True worth of your points</p>
+                    </div>
+
+                    {/* NEW: LEARN CARD */}
+                    <div className="action-card" onClick={() => setActiveTab("learn")}>
+                        <div className="card-icon">📖</div>
+                        <h3>Learn</h3>
+                        <p>Glossary & financial literacy</p>
+                    </div>
+                </section>
+            </section>
+        </div>
+    );
+}
+
 /* ================= CHATBOT COMPONENT (CONTEXT AWARE) ================= */
 
 function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compareRight, quizResults, optimizerResult }) {
@@ -194,7 +491,9 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
         // 2. Dynamic "On Screen" Context
         let screenContext = "";
 
-        if (activeTab === "optimizer") {
+        if (activeTab === "list") {
+            screenContext = "USER LOCATION: Card Directory. User is filtering/sorting the full list of cards.";
+        } else if (activeTab === "optimizer") {
             if (optimizerResult) {
                 screenContext = `
                 OPTIMIZER RESULT DISPLAYED:
@@ -229,6 +528,8 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
             }
         } else if (activeTab === "calculator") {
             screenContext = "USER LOCATION: CPP Calculator. Help them calculate the value of their points (Cents Per Point).";
+        } else if (activeTab === "learn") {
+            screenContext = "USER LOCATION: Glossary/Learn page. User is reading financial terms.";
         }
 
         return `
@@ -1025,44 +1326,6 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                 input:checked + .slider { background-color: var(--warm-gold); }
                 input:checked + .slider:before { transform: translateX(18px); }
             `}</style>
-        </div>
-    );
-}
-
-// ================= ORIGINAL PAGES (RESTORED) =================
-
-function HomePage({ setActiveTab, selectedBank }) {
-    return (
-        <div className="home-page">
-            <div className="greek-column left-column"></div>
-            <div className="greek-column right-column"></div>
-            <section className="hero">
-                <h2>Clarity for your {selectedBank === "All Institutions" ? "finances" : selectedBank + " cards"}</h2>
-                <p className="hero-subtitle">Unbiased tools and transparent comparisons</p>
-                <section className="action-cards">
-                    {/* NEW OPTIMIZER CARD */}
-                    <div className="action-card" onClick={() => setActiveTab("optimizer")}>
-                        <div className="card-icon">👁️</div>
-                        <h3>Optimizer</h3>
-                        <p>Vision-based recommendations</p>
-                    </div>
-                    <div className="action-card" onClick={() => setActiveTab("quiz")}>
-                        <div className="card-icon">⊕</div>
-                        <h3>Find My Card</h3>
-                        <p>Personalized matches {selectedBank !== "All Institutions" ? `from ${selectedBank}` : ""}</p>
-                    </div>
-                    <div className="action-card" onClick={() => setActiveTab("compare")}>
-                        <div className="card-icon">⊞</div>
-                        <h3>Compare</h3>
-                        <p>Side-by-side spec breakdown</p>
-                    </div>
-                    <div className="action-card" onClick={() => setActiveTab("calculator")}>
-                        <div className="card-icon">◈</div>
-                        <h3>CPP Calc</h3>
-                        <p>True worth of your points</p>
-                    </div>
-                </section>
-            </section>
         </div>
     );
 }
