@@ -13,20 +13,8 @@ export interface Card{
 	};
 }
 
-const DATA_FILE = path.join(process.cwd(), "data", "data.json");
-
 export class CardModel {
     dataCards: {cards: Card[]} = {cards: []};
-    cardModel: any;
-
-    public async readCards(): Promise<Card[]> {
-		try {
-			const data = await fs.readFile(DATA_FILE, "utf-8");
-			return JSON.parse(data);
-		} catch {
-			return [];
-		}
-	}
 
     public getCards(): Card[] {
         return this.dataCards.cards;
