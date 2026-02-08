@@ -416,7 +416,7 @@ function HomePage({ setActiveTab, selectedBank }) {
                     <div className="action-card" onClick={() => setActiveTab("list")}>
                         <div className="card-icon">☰</div>
                         <h3>Card Directory</h3>
-                        <p>Sort by Value, Fee, or Student status</p>
+                        <p>Sort and filter through the cards</p>
                     </div>
 
                     {/* EXISTING: OPTIMIZER */}
