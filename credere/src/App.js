@@ -5,26 +5,26 @@ import "./App.css";
 const CREDIT_CARDS = [
   {
     id: 1,
-    name: "Scotiabank Scene+ Visa",
-    issuer: "Scotiabank",
-    annualFee: 0,
-    earnRate: "5% on groceries, dining, entertainment",
-    welcomeBonus: "10,000 points",
-    minIncome: 12000,
+    name: "RBC® British Airways Visa Infinite†",
+    issuer: "RBC",
+    annualFee: 165,
+    earnRate: "3x points on British Airways†",
+    welcomeBonus: "Companion award eVoucher upon $30,000 spend†",
+    minIncome: 60000,
     tier: "A",
-    category: "cashback",
-    studentFriendly: true,
-    typicalCPP: 1.0,
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 1.8,
     foreignFee: 2.5,
   },
   {
     id: 2,
-    name: "TD Aeroplan Visa Infinite",
-    issuer: "TD",
-    annualFee: 139,
-    earnRate: "1.5x Aeroplan per $1",
-    welcomeBonus: "50,000 Aeroplan points",
-    minIncome: 60000,
+    name: "Business Platinum Card from American Express",
+    issuer: "American Express",
+    annualFee: 799,
+    earnRate: "Varies by category",
+    welcomeBonus: "$200 annual travel credit",
+    minIncome: 100000,
     tier: "S",
     category: "travel",
     studentFriendly: false,
@@ -33,45 +33,101 @@ const CREDIT_CARDS = [
   },
   {
     id: 3,
-    name: "Tangerine Money-Back",
-    issuer: "Tangerine",
+    name: "American Express Gold Rewards Card",
+    issuer: "American Express",
     annualFee: 0,
-    earnRate: "2% on 3 categories, 0.5% other",
-    welcomeBonus: "$50 cashback",
-    minIncome: 0,
+    earnRate: "2x points on travel, gas, grocery & drugstore",
+    welcomeBonus: "Plaza Premium Lounge passes",
+    minIncome: 12000,
     tier: "B",
     category: "cashback",
     studentFriendly: true,
-    typicalCPP: 1.0,
+    typicalCPP: 1.5,
     foreignFee: 2.5,
   },
   {
     id: 4,
-    name: "RBC Avion Visa Infinite",
-    issuer: "RBC",
-    annualFee: 120,
-    earnRate: "1 RBC Rewards per $1",
-    welcomeBonus: "35,000 points",
+    name: "American Express Platinum Card",
+    issuer: "American Express",
+    annualFee: 799,
+    earnRate: "Varies by category",
+    welcomeBonus: "$200 annual travel credit",
+    minIncome: 100000,
+    tier: "S",
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 2.0,
+    foreignFee: 0,
+  },
+  {
+    id: 5,
+    name: "American Express Aeroplan Business Reserve Card",
+    issuer: "American Express",
+    annualFee: 599,
+    earnRate: "3x points on Air Canada flights and vacations",
+    welcomeBonus: "Unlimited Maple Leaf Lounge access",
+    minIncome: 80000,
+    tier: "S",
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 2.0,
+    foreignFee: 0,
+  },
+  {
+    id: 6,
+    name: "American Express Aeroplan Reserve Card",
+    issuer: "American Express",
+    annualFee: 599,
+    earnRate: "3x points on Air Canada flights and vacations",
+    welcomeBonus: "Unlimited Maple Leaf Lounge access",
+    minIncome: 80000,
+    tier: "S",
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 2.0,
+    foreignFee: 0,
+  },
+  {
+    id: 7,
+    name: "American Express Business Gold Rewards Card",
+    issuer: "American Express",
+    annualFee: 199,
+    earnRate: "Varies by category",
+    welcomeBonus: "10,000 MR Quarterly Purchase Bonus",
+    minIncome: 60000,
+    tier: "A",
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 1.7,
+    foreignFee: 0,
+  },
+  {
+    id: 8,
+    name: "Marriott Bonvoy Business American Express Card",
+    issuer: "American Express",
+    annualFee: 150,
+    earnRate: "Varies by category",
+    welcomeBonus: "Anniversary free night award",
     minIncome: 60000,
     tier: "A",
     category: "travel",
     studentFriendly: false,
     typicalCPP: 1.5,
-    foreignFee: 2.5,
+    foreignFee: 0,
   },
   {
-    id: 5,
-    name: "CIBC Dividend Visa",
-    issuer: "CIBC",
-    annualFee: 0,
-    earnRate: "1% on all purchases",
-    welcomeBonus: "None",
-    minIncome: 15000,
-    tier: "C",
-    category: "cashback",
-    studentFriendly: true,
-    typicalCPP: 1.0,
-    foreignFee: 2.5,
+    id: 9,
+    name: "Marriott Bonvoy American Express Card",
+    issuer: "American Express",
+    annualFee: 120,
+    earnRate: "Varies by category",
+    welcomeBonus: "Anniversary Free Night Award",
+    minIncome: 60000,
+    tier: "A",
+    category: "travel",
+    studentFriendly: false,
+    typicalCPP: 1.5,
+    foreignFee: 0,
   },
 ];
 
@@ -205,13 +261,6 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>💳 CardSmart</h1>
-        <p className="tagline">
-          Unbiased credit card transparency for young Canadians
-        </p>
-      </header>
-
       <nav className="nav-tabs">
         <button
           className={activeTab === "home" ? "active" : ""}
@@ -259,7 +308,8 @@ function App() {
           Source
         </p>
         <p className="disclaimer">
-          Not affiliated with any bank. Always verify terms with card issuers.
+          Not financial advice. Always do your own research. Card terms subject
+          to change.
         </p>
       </footer>
     </div>
@@ -271,80 +321,34 @@ function HomePage({ setActiveTab }) {
   return (
     <div className="home-page">
       <section className="hero">
-        <h2>Stop guessing. Start maximizing.</h2>
-        <p className="hero-text">
-          As a 19-year-old, choosing your first credit card shouldn't feel
-          overwhelming. We cut through the marketing noise to show you real
-          value, unbiased comparisons, and what those "50,000 points!" actually
-          mean in dollars.
+        <h2>Choose your credit card with clarity</h2>
+        <p className="hero-subtitle">
+          Unbiased tools and transparent comparisons for young Canadians
         </p>
-        <div className="cta-buttons">
-          <button className="btn-primary" onClick={() => setActiveTab("quiz")}>
-            Find My Perfect Card
-          </button>
-          <button
-            className="btn-secondary"
-            onClick={() => setActiveTab("calculator")}
-          >
-            Calculate Points Value
-          </button>
+      </section>
+
+      <section className="action-cards">
+        <div className="action-card primary" onClick={() => setActiveTab("quiz")}>
+          <div className="card-icon">→</div>
+          <h3>Find My Card</h3>
+          <p>Answer 5 questions, get personalized recommendations</p>
+        </div>
+
+        <div className="action-card" onClick={() => setActiveTab("compare")}>
+          <div className="card-icon">⊞</div>
+          <h3>Compare All Cards</h3>
+          <p>Browse and filter our complete database</p>
+        </div>
+
+        <div className="action-card" onClick={() => setActiveTab("calculator")}>
+          <div className="card-icon">∑</div>
+          <h3>Calculate Value</h3>
+          <p>Find the true worth of your rewards points</p>
         </div>
       </section>
 
-      <section className="why-section">
-        <h3>Why CardSmart?</h3>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <span className="icon">🎯</span>
-            <h4>No Affiliate Bias</h4>
-            <p>
-              We don't get paid by banks. Our recommendations are based purely
-              on value.
-            </p>
-          </div>
-          <div className="feature-card">
-            <span className="icon">🧮</span>
-            <h4>CPP Calculator</h4>
-            <p>
-              Know exactly what your points are worth - not what marketing
-              claims.
-            </p>
-          </div>
-          <div className="feature-card">
-            <span className="icon">📚</span>
-            <h4>Learn as You Go</h4>
-            <p>
-              Understand APR, annual fees, and why they matter for your
-              finances.
-            </p>
-          </div>
-          <div className="feature-card">
-            <span className="icon">⚖️</span>
-            <h4>Side-by-Side Compare</h4>
-            <p>
-              See tier rankings and real value for cards that match your
-              spending.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="stats-section">
-        <h3>The Problem We're Solving</h3>
-        <div className="stats-grid">
-          <div className="stat">
-            <span className="stat-number">68%</span>
-            <p>of adults don't understand credit card interest</p>
-          </div>
-          <div className="stat">
-            <span className="stat-number">$5,700</span>
-            <p>average Canadian credit card debt</p>
-          </div>
-          <div className="stat">
-            <span className="stat-number">0.5¢</span>
-            <p>value of poorly redeemed points (vs 2¢+ optimal)</p>
-          </div>
-        </div>
+      <section className="value-prop">
+        <p>No affiliate links • No hidden agendas • Built for transparency</p>
       </section>
     </div>
   );
@@ -352,178 +356,117 @@ function HomePage({ setActiveTab }) {
 
 // CPP CALCULATOR
 function CPPCalculator() {
-  const [cashValue, setCashValue] = useState("");
   const [pointsUsed, setPointsUsed] = useState("");
-  const [annualFee, setAnnualFee] = useState("");
+  const [cashValue, setCashValue] = useState("");
   const [cpp, setCpp] = useState(null);
-  const [savedCalculations, setSavedCalculations] = useState([]);
 
   const calculateCPP = () => {
-    if (!cashValue || !pointsUsed) return;
+    const points = parseFloat(pointsUsed);
+    const value = parseFloat(cashValue);
 
-    const cppValue = (parseFloat(cashValue) / parseFloat(pointsUsed)) * 100;
-    setCpp(cppValue.toFixed(2));
+    if (points && value && points > 0) {
+      const cppValue = (value / points) * 100;
+      setCpp(cppValue.toFixed(2));
+    }
   };
 
-  const getRating = (cppValue) => {
-    if (cppValue >= 2.0)
-      return { text: "Excellent", color: "#10b981", emoji: "🌟" };
-    if (cppValue >= 1.5) return { text: "Good", color: "#3b82f6", emoji: "👍" };
-    if (cppValue >= 1.0) return { text: "Fair", color: "#f59e0b", emoji: "👌" };
-    return { text: "Poor", color: "#ef4444", emoji: "⚠️" };
-  };
-
-  const saveCalculation = () => {
-    if (!cpp) return;
-    const calc = {
-      cashValue: parseFloat(cashValue),
-      pointsUsed: parseFloat(pointsUsed),
-      cpp: parseFloat(cpp),
-      annualFee: annualFee ? parseFloat(annualFee) : 0,
-      timestamp: new Date().toLocaleString(),
-    };
-    setSavedCalculations([...savedCalculations, calc]);
+  const getValueRating = (cppValue) => {
+    if (cppValue >= 2.0) return { text: "Excellent", class: "excellent" };
+    if (cppValue >= 1.5) return { text: "Good", class: "good" };
+    if (cppValue >= 1.0) return { text: "Fair", class: "fair" };
+    return { text: "Poor", class: "poor" };
   };
 
   return (
     <div className="calculator-page">
       <h2>CPP (Cents Per Point) Calculator</h2>
       <p className="subtitle">
-        Find out the real cash value of your rewards redemption
+        Discover the true value of your credit card points or miles
       </p>
 
-      <div className="calculator-container">
-        <div className="calculator-form">
-          <div className="form-group">
-            <label>Cash Value of Reward ($)</label>
-            <input
-              type="number"
-              placeholder="e.g., 500"
-              value={cashValue}
-              onChange={(e) => setCashValue(e.target.value)}
-            />
-            <small>
-              What would this cost in cash? (flight, hotel, product)
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label>Points Required</label>
-            <input
-              type="number"
-              placeholder="e.g., 25000"
-              value={pointsUsed}
-              onChange={(e) => setPointsUsed(e.target.value)}
-            />
-            <small>How many points does this redemption cost?</small>
-          </div>
-
-          <div className="form-group">
-            <label>Annual Fee (Optional)</label>
-            <input
-              type="number"
-              placeholder="e.g., 120"
-              value={annualFee}
-              onChange={(e) => setAnnualFee(e.target.value)}
-            />
-            <small>Annual card fee (for net value calculation)</small>
-          </div>
-
-          <button className="btn-primary" onClick={calculateCPP}>
-            Calculate CPP
-          </button>
+      <div className="calculator-card">
+        <div className="input-group">
+          <label htmlFor="points">Points/Miles Used</label>
+          <input
+            id="points"
+            type="number"
+            placeholder="e.g., 25000"
+            value={pointsUsed}
+            onChange={(e) => setPointsUsed(e.target.value)}
+          />
         </div>
 
-        {cpp && (
-          <div className="result-card">
-            <h3>Your CPP Result</h3>
-            <div className="cpp-result" style={{ color: getRating(cpp).color }}>
-              <span className="cpp-value">{cpp}¢</span>
-              <span className="cpp-emoji">{getRating(cpp).emoji}</span>
-            </div>
-            <div
-              className="rating-badge"
-              style={{ backgroundColor: getRating(cpp).color }}
-            >
-              {getRating(cpp).text}
-            </div>
+        <div className="input-group">
+          <label htmlFor="cash">Cash Value Received ($)</label>
+          <input
+            id="cash"
+            type="number"
+            placeholder="e.g., 500"
+            value={cashValue}
+            onChange={(e) => setCashValue(e.target.value)}
+          />
+        </div>
 
-            <div className="result-details">
-              <p>
-                You're getting <strong>{cpp} cents of value</strong> per point
-              </p>
-              <p>
-                Total value: <strong>${cashValue}</strong> for{" "}
-                <strong>{Number(pointsUsed).toLocaleString()}</strong> points
-              </p>
-              {annualFee && (
-                <p className="net-value">
-                  Net value after ${annualFee} annual fee:
-                  <strong>
-                    {" "}
-                    $
-                    {(parseFloat(cashValue) - parseFloat(annualFee)).toFixed(2)}
-                  </strong>
-                </p>
-              )}
-            </div>
+        <button className="btn-primary" onClick={calculateCPP}>
+          Calculate CPP
+        </button>
 
-            <button className="btn-secondary" onClick={saveCalculation}>
-              Save & Compare
-            </button>
+        {cpp !== null && (
+          <div className="result">
+            <h3>Your CPP: {cpp}¢</h3>
+            <p className={`value-rating ${getValueRating(parseFloat(cpp)).class}`}>
+              {getValueRating(parseFloat(cpp)).text} Value
+            </p>
           </div>
         )}
       </div>
 
-      {savedCalculations.length > 0 && (
-        <div className="saved-calculations">
-          <h3>Saved Comparisons</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Cash Value</th>
-                <th>Points</th>
-                <th>CPP</th>
-                <th>Rating</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {savedCalculations.map((calc, idx) => (
-                <tr key={idx}>
-                  <td>${calc.cashValue}</td>
-                  <td>{calc.pointsUsed.toLocaleString()}</td>
-                  <td>{calc.cpp}¢</td>
-                  <td style={{ color: getRating(calc.cpp).color }}>
-                    {getRating(calc.cpp).text}
-                  </td>
-                  <td>{calc.timestamp}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="info-section">
+        <h3>How to Use This Calculator</h3>
+        <ol>
+          <li>
+            <strong>Find a redemption:</strong> Look up what you can redeem
+            points for (flights, hotels, gift cards, cashback, etc.)
+          </li>
+          <li>
+            <strong>Enter the numbers:</strong> Input how many points it costs
+            and the equivalent cash value
+          </li>
+          <li>
+            <strong>Calculate:</strong> See your CPP and whether it's a good
+            deal
+          </li>
+        </ol>
 
-      <div className="info-box">
-        <h4>💡 Quick CPP Guide</h4>
-        <ul>
-          <li>
-            <strong>2.0+ CPP:</strong> Excellent redemption (business/first
-            class flights, luxury hotels)
-          </li>
-          <li>
-            <strong>1.5-2.0 CPP:</strong> Good value (economy flights, mid-tier
-            hotels)
-          </li>
-          <li>
-            <strong>1.0-1.5 CPP:</strong> Fair (gift cards, statement credits)
-          </li>
-          <li>
-            <strong>Under 1.0 CPP:</strong> Poor - you'd be better off with
-            cashback
-          </li>
-        </ul>
+        <div className="example-box">
+          <h4>Example:</h4>
+          <p>
+            You want to book a flight that costs either 25,000 points OR $500
+            cash.
+          </p>
+          <p>
+            → Enter 25,000 points and $500 cash value
+            <br />→ Result: 2.0 CPP (Excellent value!)
+          </p>
+        </div>
+
+        <div className="benchmark-box">
+          <h4>CPP Benchmarks:</h4>
+          <ul>
+            <li>
+              <strong>2.0+ CPP:</strong> Excellent - This is a great redemption
+            </li>
+            <li>
+              <strong>1.5-2.0 CPP:</strong> Good - Above average value
+            </li>
+            <li>
+              <strong>1.0-1.5 CPP:</strong> Fair - Decent but not optimal
+            </li>
+            <li>
+              <strong>&lt;1.0 CPP:</strong> Poor - You're losing value
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -536,11 +479,8 @@ function QuizPage() {
   const [showResults, setShowResults] = useState(false);
 
   const handleAnswer = (value) => {
-    const newAnswers = {
-      ...answers,
-      [QUIZ_QUESTIONS[currentQuestion].id]: value,
-    };
-    setAnswers(newAnswers);
+    const question = QUIZ_QUESTIONS[currentQuestion];
+    setAnswers({ ...answers, [question.id]: value });
 
     if (currentQuestion < QUIZ_QUESTIONS.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -549,72 +489,72 @@ function QuizPage() {
     }
   };
 
-  const getRecommendations = () => {
-    const spending = answers[1];
-    const spendCategory = answers[2];
-    const carriesBalance = answers[3];
-    const travel = answers[4];
-    const income = answers[5];
-
-    let recommendations = [];
-
-    // Logic for recommendations based on quiz answers
-    if (carriesBalance === "usually" || carriesBalance === "sometimes") {
-      // Low APR more important than rewards
-      recommendations.push({
-        card: CREDIT_CARDS[2], // Tangerine
-        reason:
-          "No annual fee and simple cashback. Focus on paying down balance before chasing rewards.",
-        priority: 1,
-      });
-    } else if (income === "student" || income === "entry") {
-      // Student-friendly cards
-      const studentCards = CREDIT_CARDS.filter((c) => c.studentFriendly);
-      recommendations.push({
-        card: studentCards[0],
-        reason:
-          "No annual fee, low income requirements, and solid earn rates for your spending level.",
-        priority: 1,
-      });
-    } else if (travel === "multiple" || travel === "frequent") {
-      // Travel cards
-      const travelCards = CREDIT_CARDS.filter((c) => c.category === "travel");
-      recommendations.push({
-        card: travelCards[0],
-        reason:
-          "High CPP on travel redemptions, no foreign transaction fees, excellent welcome bonus.",
-        priority: 1,
-      });
-    } else {
-      // Default to cashback
-      recommendations.push({
-        card: CREDIT_CARDS[0],
-        reason:
-          "Simple, high earn rates on everyday spending with no annual fee.",
-        priority: 1,
-      });
-    }
-
-    // Add 2 more alternatives
-    const remaining = CREDIT_CARDS.filter(
-      (c) => !recommendations.find((r) => r.card.id === c.id)
-    ).slice(0, 2);
-
-    remaining.forEach((card) => {
-      recommendations.push({
-        card,
-        reason: "Alternative option worth considering based on your profile.",
-        priority: 2,
-      });
-    });
-
-    return recommendations;
-  };
-
   const resetQuiz = () => {
     setCurrentQuestion(0);
     setAnswers({});
     setShowResults(false);
+  };
+
+  const getRecommendations = () => {
+    const spending = answers[1];
+    const category = answers[2];
+    const balance = answers[3];
+    const travel = answers[4];
+    const income = answers[5];
+
+    let recommendations = CREDIT_CARDS.map((card) => {
+      let score = 0;
+      let reasons = [];
+
+      // Income match
+      const incomeValue = {
+        student: 10000,
+        entry: 30000,
+        mid: 60000,
+        high: 100000,
+      };
+      if (card.minIncome <= incomeValue[income]) {
+        score += 10;
+        reasons.push("You meet the income requirement");
+      }
+
+      // No annual fee preference for lower spending
+      if (spending === "low" && card.annualFee === 0) {
+        score += 8;
+        reasons.push("No annual fee matches your spending level");
+      }
+
+      // Travel match
+      if (
+        (travel === "multiple" || travel === "frequent") &&
+        card.category === "travel"
+      ) {
+        score += 10;
+        reasons.push("Great for frequent travelers");
+      }
+
+      // Category match
+      if (category === "groceries" && card.earnRate.includes("groceries")) {
+        score += 8;
+        reasons.push("High earn rate on groceries");
+      }
+
+      // Balance carrying - prefer no fee cards
+      if (balance !== "never" && card.annualFee === 0) {
+        score += 5;
+        reasons.push("No annual fee is better when carrying balances");
+      }
+
+      // Tier bonus
+      const tierScore = { S: 10, A: 7, B: 4, C: 2 };
+      score += tierScore[card.tier];
+
+      return { card, score, reasons };
+    });
+
+    return recommendations
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
   };
 
   if (showResults) {
@@ -624,27 +564,30 @@ function QuizPage() {
       <div className="quiz-results">
         <h2>Your Personalized Recommendations</h2>
         <p className="subtitle">
-          Based on your spending habits and financial profile
+          Based on your answers, here are the best cards for you:
         </p>
 
         {recommendations.map((rec, idx) => (
-          <div
-            key={idx}
-            className={`recommendation-card ${
-              rec.priority === 1 ? "top-pick" : ""
-            }`}
-          >
-            {rec.priority === 1 && <span className="badge">Top Pick</span>}
-            <div className="card-header">
-              <h3>{rec.card.name}</h3>
-              <span
-                className={`tier-badge tier-${rec.card.tier.toLowerCase()}`}
-              >
+          <div key={rec.card.id} className="recommendation-card">
+            <div className="rec-header">
+              <h3>
+                #{idx + 1}: {rec.card.name}
+              </h3>
+              <span className={`tier-badge tier-${rec.card.tier.toLowerCase()}`}>
                 Tier {rec.card.tier}
               </span>
             </div>
-            <p className="recommendation-reason">{rec.reason}</p>
-            <div className="card-details-grid">
+
+            <div className="rec-reasons">
+              <strong>Why this card:</strong>
+              <ul>
+                {rec.reasons.map((reason, i) => (
+                  <li key={i}>{reason}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="card-details">
               <div>
                 <strong>Annual Fee:</strong> ${rec.card.annualFee}
               </div>
