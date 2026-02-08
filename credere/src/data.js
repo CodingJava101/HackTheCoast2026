@@ -386,7 +386,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Total of 70,000 BMO Rewards points",
         minIncome: 60000,
         tier: "A",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 0.67,
         foreignFee: 2.5
@@ -484,7 +484,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 21,000 Avion points",
         minIncome: 0,
         tier: "B",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -526,7 +526,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 15,000 MR points",
         minIncome: 0,
         tier: "A",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 2.2,
         foreignFee: 2.5
@@ -624,7 +624,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "10,000 MR points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -638,7 +638,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 11,000 Avion points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -666,7 +666,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Total of 30,000 MBNA Rewards points",
         minIncome: 80000,
         tier: "A",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -680,7 +680,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 200,000 BMO Rewards points",
         minIncome: 150000,
         tier: "S",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 0.67,
         foreignFee: 2.5
@@ -806,7 +806,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 10,000 Scene+ points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -834,7 +834,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 10,000 MBNA Rewards points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 2.2,
         foreignFee: 2.5
@@ -946,7 +946,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "15,152 TD Rewards Points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 0.5,
         foreignFee: 2.5
@@ -974,7 +974,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 5,000 Scene+ points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 0
@@ -988,7 +988,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "20,000 PC Optimum points",
         minIncome: 80000,
         tier: "B",
-        category: "cashback",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -1100,7 +1100,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "N/A",
         minIncome: 15000,
         tier: "C",
-        category: "travel",
+        category: "low_interest",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -1142,7 +1142,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "No welcome bonus",
         minIncome: 80000,
         tier: "B",
-        category: "cashback",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -1170,7 +1170,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "No welcome bonus",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 0
@@ -1184,7 +1184,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "No welcome bonus",
         minIncome: 60000,
         tier: "B",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 1.0,
         foreignFee: 0
@@ -1198,7 +1198,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "No welcome bonus",
         minIncome: 80000,
         tier: "A",
-        category: "travel",
+        category: "rewards",
         studentFriendly: false,
         typicalCPP: 1.0,
         foreignFee: 0
@@ -1212,7 +1212,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "No signup bonus",
         minIncome: 0,
         tier: "C",
-        category: "cashback",
+        category: "low_interest",
         studentFriendly: true,
         typicalCPP: 1.0,
         foreignFee: 2.5
@@ -1254,7 +1254,7 @@ export const CREDIT_CARDS = [
         welcomeBonus: "Up to 25,000 BMO Rewards points",
         minIncome: 0,
         tier: "C",
-        category: "travel",
+        category: "rewards",
         studentFriendly: true,
         typicalCPP: 0.67,
         foreignFee: 2.5
