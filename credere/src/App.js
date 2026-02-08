@@ -1538,6 +1538,8 @@ function CPPCalculator() {
 
     return (
         <div className="calculator-page">
+            <div className="greek-column left-column"></div>
+            <div className="greek-column right-column"></div>
             <div className="calculator-card">
                 <h2>Cents Per Point (CPP) Calculator</h2>
                 <div className="input-group">
@@ -1613,6 +1615,8 @@ function LearnPage() {
     const [expandedTerm, setExpandedTerm] = useState(null);
     return (
         <div className="learn-page">
+            <div className="greek-column left-column"></div>
+            <div className="greek-column right-column"></div>
             <h2>Financial Lexicon</h2>
             <p className="subtitle">Master the language of credit</p>
             <div className="glossary-list">
