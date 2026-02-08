@@ -651,11 +651,12 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                 
                 3. Determine which card yields the HIGHEST return for this specific purchase.
                 
-                Return JSON format ONLY:
+                IMPORTANT: Return ONLY raw JSON. Do not include Markdown formatting (no \`\`\`json).
+                Structure:
                 {
                     "category": "String (e.g. Dining)",
                     "recommendedCard": "String (Name of card)",
-                    "reasoning": "String (Short explanation why, e.g. 'This card earns 4% on groceries')",
+                    "reasoning": "String (Short explanation why)",
                     "estimatedReturn": "String (e.g. '4 points/$1')"
                 }
                 `;
@@ -684,28 +685,33 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                     ]
                 });
 
-                // --- FIX: ROBUST RESPONSE PARSING ---
+                // --- ROBUST RESPONSE PARSING ---
                 let responseText = "";
 
-                // 1. Try standard SDK method
+                // 1. Extract text safely
                 if (typeof response.text === 'function') {
                     responseText = response.text();
-                }
-                // 2. Try raw property access (New SDK)
-                else if (response.candidates && response.candidates[0]?.content?.parts?.[0]?.text) {
+                } else if (response.candidates && response.candidates[0]?.content?.parts?.[0]?.text) {
                     responseText = response.candidates[0].content.parts[0].text;
-                }
-                // 3. Fallback for edge cases
-                else if (typeof response.text === 'string') {
-                    responseText = response.text;
-                }
-                else {
-                    console.error("Unknown Response Structure:", response);
+                } else {
                     throw new Error("Could not extract text from AI response.");
                 }
 
-                // Clean and Parse JSON
-                const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                console.log("Raw AI Response:", responseText); // Helpful for debugging
+
+                // 2. Extract JSON using Regex (ignores "I am unable..." or Markdown wrappers)
+                const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+
+                if (!jsonMatch) {
+                    // Check if it's a refusal
+                    if (responseText.includes("unable") || responseText.includes("cannot")) {
+                        throw new Error("The AI refused to analyze this image. Try an image without people or sensitive text.");
+                    }
+                    throw new Error("AI did not return valid JSON.");
+                }
+
+                // 3. Parse the extracted JSON string
+                const jsonString = jsonMatch[0];
                 const data = JSON.parse(jsonString);
 
                 setOptimizerResult(data);
@@ -713,7 +719,7 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
             };
         } catch (error) {
             console.error("Optimization failed:", error);
-            alert("AI Analysis failed. See console for details.");
+            alert(`Analysis failed: ${error.message}`);
             setIsAnalyzing(false);
         }
     };
