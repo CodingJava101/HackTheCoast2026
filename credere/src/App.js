@@ -402,131 +402,145 @@ function QuizPage() {
 
 // COMPARE PAGE
 function ComparePage() {
-  const [filter, setFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("tier");
+  const [leftCard, setLeftCard] = useState(null);
+  const [rightCard, setRightCard] = useState(null);
 
-  const filteredCards = CREDIT_CARDS.filter((card) => {
-    if (filter === "all") return true;
-    if (filter === "no-fee") return card.annualFee === 0;
-    if (filter === "student") return card.studentFriendly;
-    if (filter === "travel") return card.category === "travel";
-    if (filter === "cashback") return card.category === "cashback";
-    return true;
-  });
+  const ComparisonColumn = ({ card, setCard, side }) => {
+    const [isSelecting, setIsSelecting] = useState(false);
 
-  const sortedCards = [...filteredCards].sort((a, b) => {
-    if (sortBy === "tier") {
-      const tierOrder = { S: 0, A: 1, B: 2, C: 3 };
-      return tierOrder[a.tier] - tierOrder[b.tier];
+    if (!card) {
+      return (
+        <div className="comparison-column empty">
+          <button 
+            className="select-card-btn"
+            onClick={() => setIsSelecting(true)}
+          >
+            Select a card
+          </button>
+
+          {isSelecting && (
+            <div className="card-selector-overlay" onClick={() => setIsSelecting(false)}>
+              <div className="card-selector" onClick={(e) => e.stopPropagation()}>
+                <h3>Choose a card</h3>
+                <div className="card-list">
+                  {CREDIT_CARDS.map((c) => (
+                    <button
+                      key={c.id}
+                      className="card-option"
+                      onClick={() => {
+                        setCard(c);
+                        setIsSelecting(false);
+                      }}
+                    >
+                      <div className="card-option-name">{c.name}</div>
+                      <div className="card-option-issuer">{c.issuer}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
     }
-    if (sortBy === "fee") return a.annualFee - b.annualFee;
-    if (sortBy === "cpp") return b.typicalCPP - a.typicalCPP;
-    return 0;
-  });
+
+    return (
+      <div className="comparison-column filled">
+        <div className="card-header">
+          <h3>{card.name}</h3>
+          <button 
+            className="change-card-btn"
+            onClick={() => setIsSelecting(true)}
+          >
+            Change
+          </button>
+        </div>
+
+        <div className="card-specs">
+          <div className="spec-group">
+            <div className="spec-label">Tier</div>
+            <div className="spec-value">
+              <span className={`tier-badge tier-${card.tier.toLowerCase()}`}>
+                {card.tier}
+              </span>
+            </div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Annual Fee</div>
+            <div className="spec-value">${card.annualFee}</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Earn Rate</div>
+            <div className="spec-value">{card.earnRate}</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Welcome Bonus</div>
+            <div className="spec-value">{card.welcomeBonus}</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Typical CPP</div>
+            <div className="spec-value">{card.typicalCPP}¢</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Min Income</div>
+            <div className="spec-value">${card.minIncome.toLocaleString()}</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Foreign Fee</div>
+            <div className="spec-value">{card.foreignFee}%</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Category</div>
+            <div className="spec-value">{card.category}</div>
+          </div>
+
+          <div className="spec-group">
+            <div className="spec-label">Student Friendly</div>
+            <div className="spec-value">{card.studentFriendly ? "Yes" : "No"}</div>
+          </div>
+        </div>
+
+        {isSelecting && (
+          <div className="card-selector-overlay" onClick={() => setIsSelecting(false)}>
+            <div className="card-selector" onClick={(e) => e.stopPropagation()}>
+              <h3>Choose a card</h3>
+              <div className="card-list">
+                {CREDIT_CARDS.map((c) => (
+                  <button
+                    key={c.id}
+                    className="card-option"
+                    onClick={() => {
+                      setCard(c);
+                      setIsSelecting(false);
+                    }}
+                  >
+                    <div className="card-option-name">{c.name}</div>
+                    <div className="card-option-issuer">{c.issuer}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="compare-page">
-      <h2>Compare Credit Cards</h2>
-      <p className="subtitle">
-        Unbiased comparison of popular Canadian cards for young adults
-      </p>
+      <h2>Compare Cards</h2>
+      <p className="subtitle">Side-by-side comparison</p>
 
-      <div className="filters">
-        <div className="filter-group">
-          <label>Filter by:</label>
-          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="all">All Cards</option>
-            <option value="no-fee">No Annual Fee</option>
-            <option value="student">Student-Friendly</option>
-            <option value="travel">Travel Rewards</option>
-            <option value="cashback">Cashback</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label>Sort by:</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="tier">Tier Rating</option>
-            <option value="fee">Annual Fee</option>
-            <option value="cpp">CPP Value</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="comparison-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Card</th>
-              <th>Tier</th>
-              <th>Annual Fee</th>
-              <th>Earn Rate</th>
-              <th>Welcome Bonus</th>
-              <th>Typical CPP</th>
-              <th>Min Income</th>
-              <th>Foreign Fee</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedCards.map((card) => (
-              <tr key={card.id}>
-                <td>
-                  <strong>{card.name}</strong>
-                  <br />
-                  <small>{card.issuer}</small>
-                </td>
-                <td>
-                  <span
-                    className={`tier-badge tier-${card.tier.toLowerCase()}`}
-                  >
-                    {card.tier}
-                  </span>
-                </td>
-                <td>${card.annualFee}</td>
-                <td>{card.earnRate}</td>
-                <td>{card.welcomeBonus}</td>
-                <td>
-                  <strong>{card.typicalCPP}¢</strong>
-                </td>
-                <td>${card.minIncome.toLocaleString()}</td>
-                <td>{card.foreignFee}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="tier-legend">
-        <h3>Tier System Explained</h3>
-        <div className="tier-grid">
-          <div className="tier-item">
-            <span className="tier-badge tier-s">S</span>
-            <p>
-              <strong>Elite:</strong> Best overall value, premium benefits, high
-              earn potential
-            </p>
-          </div>
-          <div className="tier-item">
-            <span className="tier-badge tier-a">A</span>
-            <p>
-              <strong>Excellent:</strong> Strong rewards, good for specific
-              spending categories
-            </p>
-          </div>
-          <div className="tier-item">
-            <span className="tier-badge tier-b">B</span>
-            <p>
-              <strong>Good:</strong> Solid starter cards, no frills but reliable
-            </p>
-          </div>
-          <div className="tier-item">
-            <span className="tier-badge tier-c">C</span>
-            <p>
-              <strong>Basic:</strong> Simple options, limited rewards but easy
-              approval
-            </p>
-          </div>
-        </div>
+      <div className="comparison-grid">
+        <ComparisonColumn card={leftCard} setCard={setLeftCard} side="left" />
+        <ComparisonColumn card={rightCard} setCard={setRightCard} side="right" />
       </div>
     </div>
   );
