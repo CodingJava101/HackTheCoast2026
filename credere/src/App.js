@@ -150,7 +150,7 @@ function App() {
                     fontWeight: 'bold',
                     textShadow: '0 1px 4px rgba(255, 255, 255, 0.8)'
                 }}>
-                    ENTER THE TEMPLE OF FINANCE
+                    ENTER THE COLOSSEUM OF CREDIT
                 </p>
 
                 {/* Re-enable clicks for the form area */}
@@ -167,7 +167,7 @@ function App() {
                         ))}
                     </select>
                     <button className="btn-go" onClick={handleGoClick}>
-                        Enter Temple
+                        Enter Colosseum
                     </button>
                 </div>
             </div>
