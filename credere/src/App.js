@@ -940,8 +940,9 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
             reader.onloadend = async () => {
                 const base64Data = reader.result.split(',')[1];
 
+                // --- MODIFIED: Added typicalCPP to card context ---
                 const cardContext = cardsToAnalyze.map(c =>
-                    `- ${c.name}: ${c.earnRate} (Fee: $${c.annualFee})`
+                    `- ${c.name}: ${c.earnRate} (Value: ~${c.typicalCPP || 1} cents/point, Fee: $${c.annualFee})`
                 ).join("\n");
 
                 const prompt = `
@@ -951,6 +952,7 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                 ${cardContext}
                 
                 3. Determine which card yields the HIGHEST return for this specific purchase.
+                4. Calculate the approximate % return value (Multiplier * CPP).
                 
                 IMPORTANT: Return ONLY raw JSON. Do not include Markdown formatting (no \`\`\`json).
                 Structure:
@@ -958,7 +960,8 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                     "category": "String (e.g. Dining)",
                     "recommendedCard": "String (Name of card)",
                     "reasoning": "String (Short explanation why)",
-                    "estimatedReturn": "String (e.g. '4 points/$1')"
+                    "estimatedReturn": "String (e.g. '4 points/$1')",
+                    "returnPercentage": "String (e.g. '~4.5%')"
                 }
                 `;
 
@@ -1199,9 +1202,17 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                                     <strong>Category Detected:</strong>
                                     <span>{optimizerResult.category}</span>
                                 </div>
+                                {/* --- MODIFIED: Added return percentage below estimated return --- */}
                                 <div className="result-row">
                                     <strong>Estimated Return:</strong>
-                                    <span className="highlight">{optimizerResult.estimatedReturn}</span>
+                                    <div style={{textAlign: 'right'}}>
+                                        <span className="highlight" style={{display:'block'}}>{optimizerResult.estimatedReturn}</span>
+                                        {optimizerResult.returnPercentage && (
+                                            <span style={{fontSize: '0.85rem', color: 'var(--slate)', fontWeight: '500'}}>
+                                                ({optimizerResult.returnPercentage} return)
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="result-reason">
                                     <p>"{optimizerResult.reasoning}"</p>
