@@ -562,12 +562,37 @@ function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compare
     );
 }
 
-// ================= OPTIMIZER PAGE (NEW) =================
+// ================= OPTIMIZER PAGE (MODIFIED) =================
 
 function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, setUseEntireDb, optimizerResult, setOptimizerResult }) {
     const [image, setImage] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // --- NEW: INSTITUTION FILTER STATE ---
+    const [selectedIssuers, setSelectedIssuers] = useState([]);
+    const [isIssuerDropdownOpen, setIsIssuerDropdownOpen] = useState(false);
+
+    // Get unique list of issuers for the dropdown
+    const allIssuers = useMemo(() => {
+        return [...new Set(allCards.map(c => c.issuer))].sort();
+    }, [allCards]);
+
+    // Calculate displayed cards based on filter
+    const displayedCards = useMemo(() => {
+        if (selectedIssuers.length === 0) {
+            return allCards; // If none selected, show all
+        }
+        return allCards.filter(c => selectedIssuers.includes(c.issuer));
+    }, [allCards, selectedIssuers]);
+
+    const toggleIssuer = (issuer) => {
+        if (selectedIssuers.includes(issuer)) {
+            setSelectedIssuers(selectedIssuers.filter(i => i !== issuer));
+        } else {
+            setSelectedIssuers([...selectedIssuers, issuer]);
+        }
+    };
 
     // Toggle card selection in wallet
     const toggleCard = (id) => {
@@ -722,24 +747,108 @@ function OptimizerPage({ allCards, myWalletIds, setMyWalletIds, useEntireDb, set
                     </div>
 
                     {!useEntireDb && (
-                        <div className="card-selector-list">
-                            <p className="instruction">Select the cards you own:</p>
-                            {allCards.map(card => (
-                                <div
-                                    key={card.id}
-                                    className={`wallet-card-item ${myWalletIds.includes(card.id) ? 'selected' : ''}`}
-                                    onClick={() => toggleCard(card.id)}
+                        <>
+                            {/* --- NEW: INSTITUTION MULTI-SELECT DROPDOWN --- */}
+                            <div className="institution-filter-wrapper" style={{ position: 'relative', margin: '1rem 0' }}>
+                                <button
+                                    className="btn-filter-dropdown"
+                                    onClick={() => setIsIssuerDropdownOpen(!isIssuerDropdownOpen)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.6rem',
+                                        background: 'white',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        fontSize: '0.9rem',
+                                        color: '#555'
+                                    }}
                                 >
-                                    <div className="checkbox-indicator">
-                                        {myWalletIds.includes(card.id) && "✓"}
+                                    <span>
+                                        {selectedIssuers.length === 0
+                                            ? "Filter by Institution (All)"
+                                            : `${selectedIssuers.length} Institution${selectedIssuers.length > 1 ? 's' : ''} Selected`}
+                                    </span>
+                                    <span>{isIssuerDropdownOpen ? "▲" : "▼"}</span>
+                                </button>
+
+                                {isIssuerDropdownOpen && (
+                                    <div className="filter-dropdown-content" style={{
+                                        position: 'absolute',
+                                        top: '100%',
+                                        left: 0,
+                                        width: '100%',
+                                        background: 'white',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                        zIndex: 10,
+                                        maxHeight: '200px',
+                                        overflowY: 'auto',
+                                        marginTop: '4px'
+                                    }}>
+                                        {allIssuers.map(issuer => (
+                                            <div
+                                                key={issuer}
+                                                onClick={() => toggleIssuer(issuer)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    borderBottom: '1px solid #f5f5f5',
+                                                    background: selectedIssuers.includes(issuer) ? '#fafafa' : 'white'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '16px', height: '16px', border: '1px solid #ccc', borderRadius: '3px',
+                                                    marginRight: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    background: selectedIssuers.includes(issuer) ? 'var(--warm-gold)' : 'white',
+                                                    borderColor: selectedIssuers.includes(issuer) ? 'var(--warm-gold)' : '#ccc'
+                                                }}>
+                                                    {selectedIssuers.includes(issuer) && <span style={{ color: 'white', fontSize: '10px' }}>✓</span>}
+                                                </div>
+                                                <span style={{ fontSize: '0.9rem' }}>{issuer}</span>
+                                            </div>
+                                        ))}
+                                        <div
+                                            onClick={() => {setSelectedIssuers([]); setIsIssuerDropdownOpen(false);}}
+                                            style={{padding: '8px 12px', cursor: 'pointer', color: 'var(--warm-gold)', fontSize: '0.8rem', textAlign:'center', fontWeight:'bold', borderTop:'1px solid #eee'}}
+                                        >
+                                            Clear Filters
+                                        </div>
                                     </div>
-                                    <div className="card-info">
-                                        <div className="card-name">{card.name}</div>
-                                        <div className="card-issuer">{card.issuer}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                )}
+                            </div>
+
+                            <div className="card-selector-list">
+                                <p className="instruction">Select the cards you own:</p>
+                                {/* USES DISPLAYED CARDS (Filtered) INSTEAD OF ALL CARDS */}
+                                {displayedCards.length === 0 ? (
+                                    <p style={{fontStyle:'italic', color: '#888', textAlign:'center', padding:'1rem'}}>No cards match current filter.</p>
+                                ) : (
+                                    displayedCards.map(card => (
+                                        <div
+                                            key={card.id}
+                                            className={`wallet-card-item ${myWalletIds.includes(card.id) ? 'selected' : ''}`}
+                                            onClick={() => toggleCard(card.id)}
+                                        >
+                                            <div className="checkbox-indicator">
+                                                {myWalletIds.includes(card.id) && "✓"}
+                                            </div>
+                                            <div className="card-info">
+                                                <div className="card-name">{card.name}</div>
+                                                <div className="card-issuer">{card.issuer}</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </>
                     )}
                     {/* Visual cue for mobile wallets - optional but good context */}
 
