@@ -56,35 +56,93 @@
     flex-direction: column;
   }
   
+  /* Add to existing App.css - Header and updated navigation styling */
+
+/* ========================================
+   APP HEADER
+======================================== */
+
+.app-header {
+    background-color: white;
+    text-align: center;
+    padding: var(--spacing-lg) var(--spacing-md);
+    border-bottom: 1px solid var(--soft-gray);
+    position: sticky;
+    top: 0;
+    z-index: 101;
+  }
+  
+  .app-title {
+    font-family: var(--font-primary);
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--warm-gold);
+    letter-spacing: 0.2em;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(212, 165, 116, 0.1);
+  }
+  
   /* ========================================
-     NAVIGATION
-     ======================================== */
+     NAVIGATION - Greek Entablature Style
+  ======================================== */
+  
   .nav-tabs {
     display: flex;
     justify-content: center;
     gap: 0;
-    background-color: white;
-    border-bottom: 2px solid var(--warm-gold);
+    background: linear-gradient(to bottom, 
+      var(--deep-gold) 0%, 
+      var(--warm-gold) 15%, 
+      #c9a566 50%,
+      var(--warm-gold) 85%, 
+      var(--deep-gold) 100%
+    );
     padding: 0;
     flex-wrap: wrap;
     position: sticky;
-    top: 0;
+    top: 105px; /* Height of header */
     z-index: 100;
+    box-shadow: 0 4px 8px rgba(184, 146, 79, 0.3);
+    border-top: 3px solid var(--deep-gold);
+    border-bottom: 4px solid var(--deep-gold);
+  }
+  
+  /* Decorative border at top of nav - like triglyphs */
+  .nav-tabs::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--deep-gold) 0px,
+      var(--deep-gold) 30px,
+      transparent 30px,
+      transparent 35px,
+      var(--deep-gold) 35px,
+      var(--deep-gold) 40px,
+      transparent 40px,
+      transparent 80px
+    );
   }
   
   .nav-tabs button {
     flex: 1;
     min-width: 120px;
     padding: var(--spacing-md) var(--spacing-md);
-    background: none;
+    background: rgba(255, 255, 255, 0.1);
     border: none;
-    border-right: var(--border-thin);
-    color: var(--slate);
+    border-right: 1px solid rgba(184, 146, 79, 0.3);
+    color: white;
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    text-shadow: 1px 1px 2px rgba(44, 44, 44, 0.2);
+    letter-spacing: 0.03em;
   }
   
   .nav-tabs button:last-child {
@@ -92,14 +150,14 @@
   }
   
   .nav-tabs button:hover {
-    background-color: var(--cream);
-    color: var(--charcoal);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
   }
   
   .nav-tabs button.active {
-    background-color: var(--cream);
-    color: var(--charcoal);
-    font-weight: 600;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 700;
   }
   
   .nav-tabs button.active::after {
@@ -108,8 +166,144 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background-color: var(--warm-gold);
+    height: 4px;
+    background-color: white;
+  }
+  
+  /* ========================================
+     GREEK COLUMNS - More Visible
+  ======================================== */
+  
+  .greek-column {
+    position: fixed;
+    top: 0;
+    width: 80px;
+    height: 100vh;
+    background: linear-gradient(to bottom, 
+      #c9c4bd 0%, 
+      #b8b2a8 2%, 
+      #d4cfc5 4%, 
+      #d4cfc5 96%, 
+      #b8b2a8 98%, 
+      #c9c4bd 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.1),
+                inset -2px 0 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .greek-column::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 4%;
+    background: linear-gradient(to bottom, 
+      #b8924f, 
+      #c9a566,
+      #d4a574
+    );
+    border-bottom: 3px solid var(--deep-gold);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .greek-column::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 5%;
+    background: linear-gradient(to bottom, 
+      #b8924f,
+      #c9a566, 
+      #d4a574
+    );
+    border-top: 3px solid var(--deep-gold);
+    border-bottom: 4px solid var(--deep-gold);
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .left-column {
+    left: 0;
+  }
+  
+  .right-column {
+    right: 0;
+  }
+  
+  /* Column fluting effect - more pronounced */
+  .greek-column {
+    background-image: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 7px,
+        rgba(184, 146, 79, 0.2) 7px,
+        rgba(184, 146, 79, 0.2) 8px,
+        rgba(255, 255, 255, 0.1) 8px,
+        rgba(255, 255, 255, 0.1) 9px
+      ),
+      linear-gradient(to bottom, 
+        #c9c4bd 0%, 
+        #b8b2a8 2%, 
+        #d4cfc5 4%, 
+        #d4cfc5 96%, 
+        #b8b2a8 98%, 
+        #c9c4bd 100%
+      );
+  }
+  
+  /* Ensure content appears above columns */
+  .home-page > section {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Responsive adjustments for header and nav */
+  @media (max-width: 768px) {
+    .app-title {
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+    }
+  
+    .nav-tabs {
+      top: 85px;
+    }
+  
+    .nav-tabs button {
+      min-width: 100px;
+      padding: var(--spacing-sm);
+      font-size: 0.85rem;
+    }
+  
+    .greek-column {
+      width: 50px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .app-title {
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+    }
+  
+    .nav-tabs {
+      top: 70px;
+    }
+  
+    .nav-tabs button {
+      font-size: 0.8rem;
+      padding: var(--spacing-xs) var(--spacing-sm);
+    }
+  
+    .greek-column {
+      width: 30px;
+    }
   }
   
   /* ========================================
@@ -1149,6 +1343,7 @@
     position: relative;
     z-index: 1;
   }
+
   
   /* ========================================
      LANDING PAGE

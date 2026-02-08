@@ -1,4 +1,4 @@
-// Corrected App.js - HomePage section with original symbols
+// Updated App.js - Add app header with CREDERE title
 import React, { useState } from "react";
 import "./App.css";
 import { CREDIT_CARDS, GLOSSARY_TERMS, QUIZ_QUESTIONS } from "./data.js";
@@ -60,9 +60,13 @@ function App() {
     );
   }
 
-  // Otherwise render the main app
+  // Otherwise render the main app with header
   return (
     <div className="app">
+      <header className="app-header">
+        <h1 className="app-title">CREDERE</h1>
+      </header>
+
       <nav className="nav-tabs">
         <button
           className={activeTab === "home" ? "active" : ""}
@@ -105,20 +109,11 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>
-          Built with ♥ for financial literacy • Unbiased • Educational • Open
-          Source
-        </p>
-        <p className="disclaimer">
-          Not financial advice. Always do your own research. Card terms subject
-          to change.
-        </p>
+        <p>No affiliate links • No hidden agendas • Built for transparency</p>
       </footer>
     </div>
   );
 }
-
-// Updated App.js - Remove "primary" class from Find My Card button
 
 // HOME PAGE - with Greek columns background
 function HomePage({ setActiveTab }) {
@@ -132,35 +127,35 @@ function HomePage({ setActiveTab }) {
         <p className="hero-subtitle">
           Unbiased tools and transparent comparisons for young Canadians
         </p>
-      </section>
 
-      <section className="action-cards">
-        <div className="action-card" onClick={() => setActiveTab("quiz")}>
-          <div className="card-icon">⊕</div>
-          <h3>Find My Card</h3>
-          <p>Answer 5 questions, get personalized recommendations</p>
-        </div>
+        <section className="action-cards">
+          <div className="action-card" onClick={() => setActiveTab("quiz")}>
+            <div className="card-icon">⊕</div>
+            <h3>Find My Card</h3>
+            <p>Answer 5 questions, get personalized recommendations</p>
+          </div>
 
-        <div className="action-card" onClick={() => setActiveTab("compare")}>
-          <div className="card-icon">⊞</div>
-          <h3>Compare All Cards</h3>
-          <p>Browse and filter our complete database</p>
-        </div>
+          <div className="action-card" onClick={() => setActiveTab("compare")}>
+            <div className="card-icon">⊞</div>
+            <h3>Compare All Cards</h3>
+            <p>Browse and filter our complete database</p>
+          </div>
 
-        <div className="action-card" onClick={() => setActiveTab("calculator")}>
-          <div className="card-icon">◈</div>
-          <h3>Calculate Value</h3>
-          <p>Find the true worth of your rewards points</p>
-        </div>
-      </section>
-
-      <section className="value-prop">
-        <p>No affiliate links • No hidden agendas • Built for transparency</p>
+          <div
+            className="action-card"
+            onClick={() => setActiveTab("calculator")}
+          >
+            <div className="card-icon">◈</div>
+            <h3>Calculate Value</h3>
+            <p>Find the true worth of your rewards points</p>
+          </div>
+        </section>
       </section>
     </div>
   );
 }
 
+// ... rest of the components remain exactly the same ...
 // CPP CALCULATOR
 function CPPCalculator() {
   const [pointsUsed, setPointsUsed] = useState("");
@@ -185,6 +180,8 @@ function CPPCalculator() {
 
   return (
     <div className="calculator-page">
+      <div className="greek-column left-column"></div>
+      <div className="greek-column right-column"></div>
       <h2>CPP (Cents Per Point) Calculator</h2>
       <p className="subtitle">
         Discover the true value of your credit card points or miles
@@ -316,7 +313,6 @@ function QuizPage() {
       let score = 0;
       let reasons = [];
 
-      // Income match
       const incomeValue = {
         student: 10000,
         entry: 30000,
@@ -328,13 +324,11 @@ function QuizPage() {
         reasons.push("You meet the income requirement");
       }
 
-      // No annual fee preference for lower spending
       if (spending === "low" && card.annualFee === 0) {
         score += 8;
         reasons.push("No annual fee - great for starter cards");
       }
 
-      // Travel category match
       if (
         (travel === "multiple" || travel === "frequent") &&
         card.category === "travel"
@@ -343,7 +337,6 @@ function QuizPage() {
         reasons.push("Travel rewards aligned with your spending");
       }
 
-      // Foreign fee for travelers
       if (
         (travel === "multiple" || travel === "frequent") &&
         card.foreignFee === 0
@@ -352,13 +345,11 @@ function QuizPage() {
         reasons.push("No foreign transaction fees");
       }
 
-      // Student friendly
       if (income === "student" && card.studentFriendly) {
         score += 6;
         reasons.push("Student-friendly requirements");
       }
 
-      // High CPP value
       if (card.typicalCPP >= 1.8) {
         score += 4;
         reasons.push(`High points value (${card.typicalCPP} CPP)`);
@@ -432,6 +423,8 @@ function QuizPage() {
 
   return (
     <div className="quiz-page">
+      <div className="greek-column left-column"></div>
+      <div className="greek-column right-column"></div>
       <h2>Find Your Perfect Card</h2>
 
       <div className="progress-bar">
@@ -614,6 +607,8 @@ function ComparePage() {
 
   return (
     <div className="compare-page">
+      <div className="greek-column left-column"></div>
+      <div className="greek-column right-column"></div>
       <h2>Compare Cards</h2>
       <p className="subtitle">Side-by-side comparison</p>
 
@@ -635,6 +630,8 @@ function LearnPage() {
 
   return (
     <div className="learn-page">
+      <div className="greek-column left-column"></div>
+      <div className="greek-column right-column"></div>
       <h2>Credit Card Glossary</h2>
       <p className="subtitle">
         Understand the terminology that matters for your financial decisions
