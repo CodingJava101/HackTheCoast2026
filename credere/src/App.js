@@ -1178,6 +1178,55 @@ function CPPCalculator() {
                     </div>
                 )}
             </div>
+
+            {/* RESTORED SECTION */}
+            <div className="info-section">
+                <h3>How to Use This Calculator</h3>
+                <ol>
+                    <li>
+                        <strong>Find a redemption:</strong> Look up what you can redeem
+                        points for (flights, hotels, gift cards, cashback, etc.)
+                    </li>
+                    <li>
+                        <strong>Enter the numbers:</strong> Input how many points it costs
+                        and the equivalent cash value
+                    </li>
+                    <li>
+                        <strong>Calculate:</strong> See your CPP and whether it's a good
+                        deal
+                    </li>
+                </ol>
+
+                <div className="example-box">
+                    <h4>Example</h4>
+                    <p>
+                        You want to book a flight that costs either 25,000 points OR $500
+                        cash.
+                    </p>
+                    <p>
+                        → Enter 25,000 points and $500 cash value
+                        <br />→ Result: 2.0 CPP (Excellent value!)
+                    </p>
+                </div>
+
+                <div className="benchmark-box">
+                    <h4>CPP Benchmarks</h4>
+                    <ul>
+                        <li>
+                            <strong>≥2.0 CPP:</strong> Excellent - This is a great redemption
+                        </li>
+                        <li>
+                            <strong>1.5-2.0 CPP:</strong> Good - Above average value
+                        </li>
+                        <li>
+                            <strong>1.0-1.5 CPP:</strong> Fair - Decent but not optimal
+                        </li>
+                        <li>
+                            <strong>&lt;1.0 CPP:</strong> Poor - You're losing value
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     );
 }
@@ -1204,6 +1253,30 @@ function LearnPage() {
                         )}
                     </div>
                 ))}
+            </div>
+
+            {/* RESTORED SECTION */}
+            <div className="research-section">
+                <h3>Why Financial Literacy Matters</h3>
+                <p>
+                    Research shows that financial stress affects mental health, career
+                    decisions, and life satisfaction. Understanding credit cards is a
+                    foundational step toward financial empowerment.
+                </p>
+                <ul>
+                    <li>
+                        68% of Canadian adults don't fully understand how credit card
+                        interest compounds
+                    </li>
+                    <li>
+                        Young adults (18-25) are most vulnerable to high-interest debt due
+                        to lack of education
+                    </li>
+                    <li>
+                        Behavioral economics shows we're biased by large point numbers
+                        ("50,000 points!") without understanding real value
+                    </li>
+                </ul>
             </div>
         </div>
     );
