@@ -105,14 +105,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>
-          Built with ♥ for financial literacy • Unbiased • Educational • Open
-          Source
-        </p>
-        <p className="disclaimer">
-          Not financial advice. Always do your own research. Card terms subject
-          to change.
-        </p>
+      <p>No affiliate links • No hidden agendas • Built for transparency</p>
       </footer>
     </div>
   );
@@ -152,10 +145,6 @@ function HomePage({ setActiveTab }) {
           <h3>Calculate Value</h3>
           <p>Find the true worth of your rewards points</p>
         </div>
-      </section>
-
-      <section className="value-prop">
-        <p>No affiliate links • No hidden agendas • Built for transparency</p>
       </section>
     </div>
   );
