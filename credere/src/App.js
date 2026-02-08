@@ -515,6 +515,7 @@ function HomePage({ setActiveTab, selectedBank }) {
                 <section className="action-cards">
                     {/* NEW: LIST CARD */}
                     <div className="action-card" onClick={() => setActiveTab("list")}>
+                        {/* Greek Letter Xi (Looks like a stylized list or columns) */}
                         <div className="card-icon">☰</div>
                         <h3>Card Directory</h3>
                         <p>Sort and filter through the cards</p>
@@ -522,13 +523,15 @@ function HomePage({ setActiveTab, selectedBank }) {
 
                     {/* EXISTING: OPTIMIZER */}
                     <div className="action-card" onClick={() => setActiveTab("optimizer")}>
-                        <div className="card-icon">👁️</div>
+                        {/* Bullseye / Concentric Circles (Represents Vision/Focus) */}
+                        <div className="card-icon">◎</div>
                         <h3>Optimizer</h3>
                         <p>Vision-based recommendations</p>
                     </div>
 
                     {/* EXISTING: QUIZ */}
                     <div className="action-card" onClick={() => setActiveTab("quiz")}>
+                        {/* Circled Plus (Represents a compass/intersection) */}
                         <div className="card-icon">⊕</div>
                         <h3>Find My Card</h3>
                         <p>Personalized matches {selectedBank !== "All Institutions" ? `from ${selectedBank}` : ""}</p>
@@ -536,13 +539,15 @@ function HomePage({ setActiveTab, selectedBank }) {
 
                     {/* EXISTING: COMPARE */}
                     <div className="action-card" onClick={() => setActiveTab("compare")}>
-                        <div className="card-icon">⊞</div>
+                        {/* Square with Vertical Line (Represents Side-by-Side comparison) */}
+                        <div className="card-icon">◫</div>
                         <h3>Compare</h3>
                         <p>Side-by-side spec breakdown</p>
                     </div>
 
                     {/* EXISTING: CALCULATOR */}
                     <div className="action-card" onClick={() => setActiveTab("calculator")}>
+                        {/* Diamond Operator (Represents Value/Gem) */}
                         <div className="card-icon">◈</div>
                         <h3>CPP Calc</h3>
                         <p>True worth of your points</p>
@@ -550,7 +555,8 @@ function HomePage({ setActiveTab, selectedBank }) {
 
                     {/* NEW: LEARN CARD */}
                     <div className="action-card" onClick={() => setActiveTab("learn")}>
-                        <div className="card-icon">📖</div>
+                        {/* Greek Letter Omega (Represents Knowledge/The Ultimate) */}
+                        <div className="card-icon">Ω</div>
                         <h3>Learn</h3>
                         <p>Glossary & financial literacy</p>
                     </div>
@@ -559,7 +565,6 @@ function HomePage({ setActiveTab, selectedBank }) {
         </div>
     );
 }
-
 /* ================= CHATBOT COMPONENT (CONTEXT AWARE) ================= */
 
 function Chatbot({ availableCards, selectedBank, activeTab, compareLeft, compareRight, quizResults, optimizerResult }) {
