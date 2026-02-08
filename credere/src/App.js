@@ -1,10 +1,66 @@
+// Corrected App.js - HomePage section with original symbols
 import React, { useState } from "react";
 import "./App.css";
 import { CREDIT_CARDS, GLOSSARY_TERMS, QUIZ_QUESTIONS } from "./data.js";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
+  const [showLanding, setShowLanding] = useState(true);
+  const [selectedBank, setSelectedBank] = useState("");
 
+  // Extract unique banks from CREDIT_CARDS
+  const canadianBanks = [
+    ...new Set(CREDIT_CARDS.map((card) => card.issuer)),
+  ].sort();
+
+  const handleGoClick = () => {
+    if (selectedBank) {
+      setShowLanding(false);
+    }
+  };
+
+  // Landing Page Component
+  const LandingPage = () => {
+    return (
+      <div className="landing-page">
+        <div className="landing-container">
+          <h1 className="landing-title">CREDERE</h1>
+          <div className="landing-form">
+            <select
+              className="bank-dropdown"
+              value={selectedBank}
+              onChange={(e) => setSelectedBank(e.target.value)}
+            >
+              <option value="">Select Your Bank</option>
+              {canadianBanks.map((bank, idx) => (
+                <option key={idx} value={bank}>
+                  {bank}
+                </option>
+              ))}
+            </select>
+            <button
+              className="btn-go"
+              onClick={handleGoClick}
+              disabled={!selectedBank}
+            >
+              Go
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // If landing page should be shown, render only that
+  if (showLanding) {
+    return (
+      <div className="app">
+        <LandingPage />
+      </div>
+    );
+  }
+
+  // Otherwise render the main app
   return (
     <div className="app">
       <nav className="nav-tabs">
@@ -50,7 +106,7 @@ function App() {
 
       <footer className="footer">
         <p>
-          Built with 💙 for financial literacy • Unbiased • Educational • Open
+          Built with ♥ for financial literacy • Unbiased • Educational • Open
           Source
         </p>
         <p className="disclaimer">
@@ -62,10 +118,15 @@ function App() {
   );
 }
 
-// HOME PAGE
+// Updated App.js - Remove "primary" class from Find My Card button
+
+// HOME PAGE - with Greek columns background
 function HomePage({ setActiveTab }) {
   return (
     <div className="home-page">
+      <div className="greek-column left-column"></div>
+      <div className="greek-column right-column"></div>
+
       <section className="hero">
         <h2>Choose your credit card with clarity</h2>
         <p className="hero-subtitle">
@@ -74,8 +135,8 @@ function HomePage({ setActiveTab }) {
       </section>
 
       <section className="action-cards">
-        <div className="action-card primary" onClick={() => setActiveTab("quiz")}>
-          <div className="card-icon">→</div>
+        <div className="action-card" onClick={() => setActiveTab("quiz")}>
+          <div className="card-icon">⊕</div>
           <h3>Find My Card</h3>
           <p>Answer 5 questions, get personalized recommendations</p>
         </div>
@@ -87,7 +148,7 @@ function HomePage({ setActiveTab }) {
         </div>
 
         <div className="action-card" onClick={() => setActiveTab("calculator")}>
-          <div className="card-icon">∑</div>
+          <div className="card-icon">◈</div>
           <h3>Calculate Value</h3>
           <p>Find the true worth of your rewards points</p>
         </div>
@@ -109,7 +170,6 @@ function CPPCalculator() {
   const calculateCPP = () => {
     const points = parseFloat(pointsUsed);
     const value = parseFloat(cashValue);
-
     if (points && value && points > 0) {
       const cppValue = (value / points) * 100;
       setCpp(cppValue.toFixed(2));
@@ -160,7 +220,11 @@ function CPPCalculator() {
         {cpp !== null && (
           <div className="result">
             <h3>Your CPP: {cpp}¢</h3>
-            <p className={`value-rating ${getValueRating(parseFloat(cpp)).class}`}>
+            <p
+              className={`value-rating ${
+                getValueRating(parseFloat(cpp)).class
+              }`}
+            >
               {getValueRating(parseFloat(cpp)).text} Value
             </p>
           </div>
@@ -185,7 +249,7 @@ function CPPCalculator() {
         </ol>
 
         <div className="example-box">
-          <h4>Example:</h4>
+          <h4>Example</h4>
           <p>
             You want to book a flight that costs either 25,000 points OR $500
             cash.
@@ -197,10 +261,10 @@ function CPPCalculator() {
         </div>
 
         <div className="benchmark-box">
-          <h4>CPP Benchmarks:</h4>
+          <h4>CPP Benchmarks</h4>
           <ul>
             <li>
-              <strong>2.0+ CPP:</strong> Excellent - This is a great redemption
+              <strong>≥2.0 CPP:</strong> Excellent - This is a great redemption
             </li>
             <li>
               <strong>1.5-2.0 CPP:</strong> Good - Above average value
@@ -242,11 +306,11 @@ function QuizPage() {
   };
 
   const getRecommendations = () => {
-    const spending = answers[1];
-    const category = answers[2];
-    const balance = answers[3];
-    const travel = answers[4];
-    const income = answers[5];
+    const spending = answers["1"];
+    const category = answers["2"];
+    const balance = answers["3"];
+    const travel = answers["4"];
+    const income = answers["5"];
 
     let recommendations = CREDIT_CARDS.map((card) => {
       let score = 0;
@@ -297,7 +361,7 @@ function QuizPage() {
       // High CPP value
       if (card.typicalCPP >= 1.8) {
         score += 4;
-        reasons.push("High points value (CPP)");
+        reasons.push(`High points value (${card.typicalCPP} CPP)`);
       }
 
       return { card, score, reasons };
@@ -311,24 +375,27 @@ function QuizPage() {
 
   if (showResults) {
     const recommendations = getRecommendations();
-
     return (
       <div className="results-page">
         <h2>Your Personalized Recommendations</h2>
-        <p className="subtitle">Based on your answers, here are your best matches:</p>
+        <p className="subtitle">
+          Based on your answers, here are your best matches:
+        </p>
 
         {recommendations.map((rec, idx) => (
           <div key={rec.card.id} className="recommendation-card">
             <div className="rec-header">
               <span className="rec-rank">#{idx + 1}</span>
               <h3>{rec.card.name}</h3>
-              <span className={`tier-badge tier-${rec.card.tier.toLowerCase()}`}>
+              <span
+                className={`tier-badge tier-${rec.card.tier.toLowerCase()}`}
+              >
                 {rec.card.tier}
               </span>
             </div>
 
             <div className="rec-reasons">
-              <h4>Why this card:</h4>
+              <h4>Why this card?</h4>
               <ul>
                 {rec.reasons.map((reason, i) => (
                   <li key={i}>{reason}</li>
@@ -338,7 +405,7 @@ function QuizPage() {
 
             <div className="rec-details">
               <div>
-                <strong>Annual Fee:</strong> ${rec.card.annualFee}
+                <strong>Annual Fee:</strong> {rec.card.annualFee}
               </div>
               <div>
                 <strong>Earn Rate:</strong> {rec.card.earnRate}
@@ -347,7 +414,7 @@ function QuizPage() {
                 <strong>Welcome Bonus:</strong> {rec.card.welcomeBonus}
               </div>
               <div>
-                <strong>Typical CPP:</strong> {rec.card.typicalCPP}¢
+                <strong>Typical CPP:</strong> {rec.card.typicalCPP}
               </div>
             </div>
           </div>
@@ -366,6 +433,7 @@ function QuizPage() {
   return (
     <div className="quiz-page">
       <h2>Find Your Perfect Card</h2>
+
       <div className="progress-bar">
         <div className="progress-fill" style={{ width: `${progress}%` }}></div>
       </div>
@@ -411,7 +479,7 @@ function ComparePage() {
     if (!card) {
       return (
         <div className="comparison-column empty">
-          <button 
+          <button
             className="select-card-btn"
             onClick={() => setIsSelecting(true)}
           >
@@ -419,8 +487,14 @@ function ComparePage() {
           </button>
 
           {isSelecting && (
-            <div className="card-selector-overlay" onClick={() => setIsSelecting(false)}>
-              <div className="card-selector" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="card-selector-overlay"
+              onClick={() => setIsSelecting(false)}
+            >
+              <div
+                className="card-selector"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <h3>Choose a card</h3>
                 <div className="card-list">
                   {CREDIT_CARDS.map((c) => (
@@ -448,7 +522,7 @@ function ComparePage() {
       <div className="comparison-column filled">
         <div className="card-header">
           <h3>{card.name}</h3>
-          <button 
+          <button
             className="change-card-btn"
             onClick={() => setIsSelecting(true)}
           >
@@ -468,7 +542,7 @@ function ComparePage() {
 
           <div className="spec-group">
             <div className="spec-label">Annual Fee</div>
-            <div className="spec-value">${card.annualFee}</div>
+            <div className="spec-value">{card.annualFee}</div>
           </div>
 
           <div className="spec-group">
@@ -483,7 +557,7 @@ function ComparePage() {
 
           <div className="spec-group">
             <div className="spec-label">Typical CPP</div>
-            <div className="spec-value">{card.typicalCPP}¢</div>
+            <div className="spec-value">{card.typicalCPP}</div>
           </div>
 
           <div className="spec-group">
@@ -493,7 +567,7 @@ function ComparePage() {
 
           <div className="spec-group">
             <div className="spec-label">Foreign Fee</div>
-            <div className="spec-value">{card.foreignFee}%</div>
+            <div className="spec-value">{card.foreignFee}</div>
           </div>
 
           <div className="spec-group">
@@ -503,12 +577,17 @@ function ComparePage() {
 
           <div className="spec-group">
             <div className="spec-label">Student Friendly</div>
-            <div className="spec-value">{card.studentFriendly ? "Yes" : "No"}</div>
+            <div className="spec-value">
+              {card.studentFriendly ? "Yes" : "No"}
+            </div>
           </div>
         </div>
 
         {isSelecting && (
-          <div className="card-selector-overlay" onClick={() => setIsSelecting(false)}>
+          <div
+            className="card-selector-overlay"
+            onClick={() => setIsSelecting(false)}
+          >
             <div className="card-selector" onClick={(e) => e.stopPropagation()}>
               <h3>Choose a card</h3>
               <div className="card-list">
@@ -540,7 +619,11 @@ function ComparePage() {
 
       <div className="comparison-grid">
         <ComparisonColumn card={leftCard} setCard={setLeftCard} side="left" />
-        <ComparisonColumn card={rightCard} setCard={setRightCard} side="right" />
+        <ComparisonColumn
+          card={rightCard}
+          setCard={setRightCard}
+          side="right"
+        />
       </div>
     </div>
   );
@@ -575,12 +658,14 @@ function LearnPage() {
                 <p>
                   <strong>Definition:</strong> {item.definition}
                 </p>
+
                 <div className="why-matters">
-                  <strong>💡 Why This Matters:</strong>
+                  <strong>Why This Matters</strong>
                   <p>{item.whyMatters}</p>
                 </div>
+
                 <div className="example">
-                  <strong>📌 Example:</strong>
+                  <strong>Example</strong>
                   <p>{item.example}</p>
                 </div>
               </div>
